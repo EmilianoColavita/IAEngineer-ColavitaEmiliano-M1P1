@@ -20,7 +20,7 @@ PROMPT = "Respondé en una sola oración: ¿qué es un SaaS?"
 def hello_openai():
     from openai import OpenAI
 
-    model = os.getenv("OPENAI_MODEL", "gpt-5.4-mini")
+    model = os.getenv("OPENAI_MODEL", "gpt-5.4-nano")
     client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
     start = time.perf_counter()
