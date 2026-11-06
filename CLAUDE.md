@@ -115,7 +115,11 @@ Flujo: `consulta → guardrail entrada → prompt YAML → LLMProvider → parse
 
 ## Estado actual
 
-- **Fase actual: 0 (Setup).** Ya tengo las instrucciones de la fase 0; estoy implementándola.
-  Al retomar, preguntame en qué punto de la fase 0 estoy y revisá lo que haya hecho.
+- Fase 0 (Setup): **completada** (venv + `hello_llm.py` funcionando).
+- **Fase actual: 1 (Contrato Pydantic en `src/schema.py`).**
+  Al retomar, preguntame en qué punto de la fase 1 estoy y revisá lo que haya hecho.
+- Contenidos de cursada a tener en cuenta: tokenización/context window, sampling (temperatura, top-p),
+  APIs de distintos proveedores, streaming, rate limits/errores, costo por token; system prompts y roles,
+  few-shot, chain-of-thought, plantillas/versionado de prompts, variables de contexto.
 
 <!-- Actualizá esta sección a medida que avances: fase actual, decisiones nuevas, pendientes. -->
