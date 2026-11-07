@@ -115,20 +115,74 @@ python -m scripts.check_retry
 Simula respuestas rotas del modelo y comprueba que el retry se recupere, que le devuelva el
 error al modelo y que falle de forma controlada si se agotan los intentos.
 
+**5. Verificar las métricas (sin llamar a la API)**
+
+```powershell
+python -m scripts.check_metrics
+```
+
+Comprueba con un LLM simulado que cada request deje una línea, que se sumen los tokens de
+todos los intentos, que los fallos también se registren y que el costo se recalcule a mano.
+Escribe en un archivo temporal: no toca `data/metrics.jsonl`.
+
+## Métricas
+
+Cada request agrega **una línea** a `data/metrics.jsonl` (append-only, una línea JSON por
+request, exitoso o no):
+
+```json
+{"timestamp": "2026-11-07T15:16:16+00:00", "provider": "openai", "model": "gpt-5.4-nano",
+ "prompt": "v1_zero_shot", "attempts": 1, "success": true, "error": null, "category": "account",
+ "input_tokens": 515, "cached_input_tokens": 0, "output_tokens": 165, "total_tokens": 680,
+ "latency_s": 4.239, "price_input_per_1m": 0.2, "price_output_per_1m": 1.25, "cost_usd": 0.00030925}
+```
+
+**Cómo recalcular el costo a mano** (solo con datos de la propia línea):
+
+```
+cost_usd = input_tokens / 1.000.000 × price_input_per_1m + output_tokens / 1.000.000 × price_output_per_1m
+         = 515 / 1.000.000 × 0.20 + 165 / 1.000.000 × 1.25
+         = 0.000103 + 0.00020625 = 0.00030925
+```
+
+- **Los precios usados se guardan en cada línea**: si el proveedor cambia la tarifa, las
+  líneas viejas se siguen pudiendo auditar con el precio vigente cuando se generaron.
+- **Retry**: tokens, costo y latencia son la **suma de todos los intentos** del request.
+- **Fallos**: un request que agotó los reintentos también se registra (`success: false`),
+  porque se pagó igual.
+- **Tokens cacheados**: se registran en `cached_input_tokens` pero se cobran a precio de input
+  completo. El costo es una estimación conservadora (techo), más simple de auditar.
+- **Precios** (USD por 1M de tokens, tier Standard, verificados el 2026-11-07 en las páginas
+  oficiales de [OpenAI](https://developers.openai.com/api/docs/pricing) y
+  [Google](https://aistudio.google.com/docs/pricing)):
+
+  | Modelo | Input | Output |
+  |---|---|---|
+  | `gpt-5.4-nano` | 0.20 | 1.25 |
+  | `gpt-5.4-mini` | 0.75 | 4.50 |
+  | `gemini-3.1-flash-lite` | 0.25 | 1.50 |
+
+  Si un modelo no está en la tabla, `cost_usd` queda en `null`: no se inventa un precio.
+
 ## Estructura del proyecto
 
 ```
 ├── src/
 │   ├── main.py            # CLI: lee argumentos, llama a triage e imprime
-│   ├── triage.py          # orquesta: prompt → LLM → validación
+│   ├── triage.py          # orquesta: prompt → LLM → validación (retry) → métricas
 │   ├── prompts.py         # carga y valida los prompts YAML
+│   ├── metrics.py         # costo por request + escritura en data/metrics.jsonl
 │   └── schema.py          # contrato Pydantic de la respuesta + casos de prueba
+├── data/
+│   └── metrics.jsonl      # una línea por request (se genera al usar la CLI)
 ├── prompts/
 │   ├── v1_zero_shot.yaml  # prompt versionado: zero-shot
 │   └── v2_few_shot.yaml   # prompt versionado: few-shot (mismas instrucciones + 6 ejemplos)
 ├── scripts/
 │   ├── hello_llm.py       # prueba de conexión con OpenAI y Gemini
-│   └── check_retry.py     # prueba del retry con un LLM simulado
+│   ├── fake_llm.py        # LLM simulado compartido por los checks
+│   ├── check_retry.py     # prueba del retry con un LLM simulado
+│   └── check_metrics.py   # prueba de las métricas con un LLM simulado
 ├── docs/                  # enunciado y uso de IA en el desarrollo
 ├── .env.example           # plantilla de variables de entorno
 └── requirements.txt       # dependencias con versiones fijadas
@@ -160,7 +214,7 @@ error al modelo y que falle de forma controlada si se agotan los intentos.
 - [x] Contrato de salida con Pydantic
 - [x] Flujo mínimo: CLI + prompt YAML + un proveedor (OpenAI)
 - [x] Retry ante JSON inválido
-- [ ] Métricas por request (`data/metrics.jsonl`)
+- [x] Métricas por request (`data/metrics.jsonl`)
 - [ ] Abstracción `LLMProvider` con dos proveedores
 - [ ] Dataset y runner de evals
 - [ ] Comparación de prompts (zero-shot vs few-shot)

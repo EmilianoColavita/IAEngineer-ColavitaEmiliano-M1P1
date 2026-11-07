@@ -134,15 +134,25 @@ Flujo: `consulta → guardrail entrada → prompt YAML → LLMProvider → parse
   `triage.py` (call_llm aislada con Responses API, temperature=0, max_output_tokens=500;
   sin Structured Outputs a propósito para que retry y "% JSON válido" midan algo) y
   `main.py` (argparse, `--prompt` con choices) funcionando de punta a punta.
-- **Fase actual: 3 (Retry ante parseo/validación inválida).** Implementada y probada; falta que
-  Emiliano la revise y commitee. En `triage.py`: `MAX_RETRIES=2` (hasta 3 llamadas), retry solo
+- Fase 3 (Retry): **completada**. En `triage.py`: `MAX_RETRIES=2` (hasta 3 llamadas), retry solo
   ante `ValidationError` (errores de API → backoff en fase 5), feedback = respuesta cruda como
   `assistant` + `RETRY_MESSAGE` con errores `campo: msg` (en código, no en YAML, igual para todas
   las versiones), `clean_raw()` saca ```json en código sin gastar retry, `TriageError` con
   `attempts` y `last_raw`, avisos por stderr. `call_llm(messages)` ahora recibe la conversación.
   `scripts/check_retry.py` lo prueba con un LLM falso (`python -m scripts.check_retry`).
   Verificado con la API real que el historial con `assistant` funciona y el modelo corrige.
-  Ojo fase 4: las métricas tienen que sumar tokens/costo de TODOS los intentos de un request.
+- **Fase actual: 4 (Métricas).** Implementada y verificada; falta que Emiliano la revise y
+  commitee. `src/metrics.py`: `PRICES` (USD/1M, verificados 2026-11-07: gpt-5.4-nano 0.20/1.25,
+  gpt-5.4-mini 0.75/4.50, gemini-3.1-flash-lite 0.25/1.50), `compute_cost` (modelo sin precio →
+  null), `log_request` (append, crea `data/`, no rompe el triage si falla la escritura),
+  `METRICS_PATH` parcheable. `triage.py`: `call_llm` devuelve `LLMResult` (texto + tokens),
+  `RequestStats` suma TODOS los intentos, se loguea en `finally` (también fallos). Cada línea
+  guarda los precios usados (auditable). Decisiones de Emiliano: tokens cacheados (a) =
+  registrados pero cobrados a precio completo; `data/metrics.jsonl` SE VERSIONA (evaluadores lo
+  ven); regenerarlo limpio con los evals en la fase 11. Checks con LLM falso compartido
+  (`scripts/fake_llm.py`) escriben en archivo temporal: `check_retry`, `check_metrics` (13 OK).
+  Dato real: mismo ticket v1 = 515 in / 165 out ($0.000309); v2 = 1081 in / 115 out ($0.000360):
+  v2 duplica el input pero responde más corto → solo +16% de costo.
 - Contenidos de cursada a tener en cuenta: tokenización/context window, sampling (temperatura, top-p),
   APIs de distintos proveedores, streaming, rate limits/errores, costo por token; system prompts y roles,
   few-shot, chain-of-thought, plantillas/versionado de prompts, variables de contexto.

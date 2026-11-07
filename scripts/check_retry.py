@@ -7,32 +7,19 @@ Uso (desde la raíz del repo):
     python -m scripts.check_retry
 """
 
-from src import triage as triage_module
-from src.triage import MAX_RETRIES, TriageError, triage
-
-VALIDO = (
-    '{"answer": "Revisamos tu cobro duplicado", "confidence": 0.9, '
-    '"category": "billing", "actions": ["Verificar transacciones del cliente"]}'
+from scripts.fake_llm import (
+    CON_FENCE,
+    CONFIDENCE_INVALIDA,
+    JSON_ROTO,
+    VALIDO,
+    install_fake_llm,
+    use_temp_metrics,
 )
-CONFIDENCE_INVALIDA = VALIDO.replace("0.9", "1.3")
-JSON_ROTO = VALIDO[:-1]  # sin la llave de cierre
-CON_FENCE = f"```json\n{VALIDO}\n```"
-
-
-def fake_llm(respuestas: list[str]):
-    """Devuelve un call_llm falso que responde en orden y registra cada conversación."""
-    llamadas = []
-
-    def call_llm(messages: list[dict]) -> str:
-        llamadas.append([dict(m) for m in messages])
-        return respuestas[len(llamadas) - 1]
-
-    return call_llm, llamadas
+from src.triage import MAX_RETRIES, TriageError, triage
 
 
 def correr(descripcion, respuestas, llamadas_esperadas, deberia_fallar=False):
-    call_llm, llamadas = fake_llm(respuestas)
-    triage_module.call_llm = call_llm  # reemplazo del proveedor real
+    llamadas = install_fake_llm(respuestas)
 
     try:
         triage("me cobraron dos veces")
@@ -46,6 +33,7 @@ def correr(descripcion, respuestas, llamadas_esperadas, deberia_fallar=False):
 
 
 def main():
+    use_temp_metrics()  # no ensuciar data/metrics.jsonl con datos falsos
     resultados = []
 
     ok, _ = correr("válido al primer intento", [VALIDO], 1)
