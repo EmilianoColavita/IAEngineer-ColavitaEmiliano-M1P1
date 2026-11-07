@@ -129,7 +129,12 @@ Flujo: `consulta → guardrail entrada → prompt YAML → LLMProvider → parse
   README inicial. Modelo en `.env`, temperatura/límites en código, NO en el YAML.
   `prompts/v2_few_shot.yaml` = system de v1 idéntico + 6 ejemplos de frontera/calibración
   dentro del system (no usa tickets del enunciado, para no contaminar evals).
-  Pendiente: `prompts.py`, `triage.py`, `main.py`.
+  `prompts.py` (PromptTemplate Pydantic, ruta desde `__file__`, safe_load, PromptError),
+  `triage.py` (call_llm aislada con Responses API, temperature=0, max_output_tokens=500;
+  sin Structured Outputs a propósito para que retry y "% JSON válido" midan algo) y
+  `main.py` (argparse, `--prompt` con choices) funcionando de punta a punta.
+  Pendiente para cerrar: que Emiliano lo revise, commit. Observado: el answer de v1 pidió
+  "últimos 4 dígitos de la tarjeta" (dato sensible → guardrail de salida en fase 9) y es largo.
 - Contenidos de cursada a tener en cuenta: tokenización/context window, sampling (temperatura, top-p),
   APIs de distintos proveedores, streaming, rate limits/errores, costo por token; system prompts y roles,
   few-shot, chain-of-thought, plantillas/versionado de prompts, variables de contexto.

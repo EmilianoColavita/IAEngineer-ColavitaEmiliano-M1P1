@@ -93,19 +93,28 @@ python -m src.schema
 Corre los casos de prueba del schema Pydantic (JSON válidos e inválidos) e informa si
 cada uno dio el resultado esperado.
 
-**3. Triage de una consulta** *(en construcción)*
+**3. Triage de una consulta**
 
 ```powershell
-python -m src.main "me cobraron dos veces la suscripción"
+python -m src.main "me cobraron dos veces la suscripción"                 # prompt por defecto (v1_zero_shot)
+python -m src.main "me cobraron dos veces la suscripción" --prompt v2_few_shot
+python -m src.main --help                                                 # ver opciones y prompts disponibles
 ```
+
+Imprime el JSON validado. Si algo falla (prompt inexistente, respuesta inválida del modelo,
+error de la API) muestra el motivo y termina con código de salida distinto de 0.
 
 ## Estructura del proyecto
 
 ```
 ├── src/
+│   ├── main.py            # CLI: lee argumentos, llama a triage e imprime
+│   ├── triage.py          # orquesta: prompt → LLM → validación
+│   ├── prompts.py         # carga y valida los prompts YAML
 │   └── schema.py          # contrato Pydantic de la respuesta + casos de prueba
 ├── prompts/
-│   └── v1_zero_shot.yaml  # prompt versionado: zero-shot
+│   ├── v1_zero_shot.yaml  # prompt versionado: zero-shot
+│   └── v2_few_shot.yaml   # prompt versionado: few-shot (mismas instrucciones + 6 ejemplos)
 ├── scripts/
 │   └── hello_llm.py       # prueba de conexión con OpenAI y Gemini
 ├── docs/                  # enunciado y uso de IA en el desarrollo
@@ -128,7 +137,7 @@ python -m src.main "me cobraron dos veces la suscripción"
 
 - [x] Setup y prueba de conexión con ambos proveedores
 - [x] Contrato de salida con Pydantic
-- [ ] Flujo mínimo: CLI + prompt YAML + un proveedor
+- [x] Flujo mínimo: CLI + prompt YAML + un proveedor (OpenAI)
 - [ ] Retry ante JSON inválido
 - [ ] Métricas por request (`data/metrics.jsonl`)
 - [ ] Abstracción `LLMProvider` con dos proveedores
