@@ -145,6 +145,51 @@ python -m evals.dataset
 Valida cada caso, muestra la cobertura por categoría y por tag, y avisa si hay desbalance o
 si algún caso se parece demasiado a un ejemplo usado dentro de un prompt (contaminación).
 
+**8. Correr los evals**
+
+```powershell
+python -m evals.runner --prompt v1_zero_shot                       # proveedor del .env
+python -m evals.runner --prompt v2_few_shot --provider gemini
+python -m evals.runner --prompt v1_zero_shot --model gpt-5.4-mini  # comparar modelos
+python -m evals.runner --prompt v1_zero_shot --limit 5             # prueba rápida y barata
+python evals/runner.py --prompt v1_zero_shot                       # forma equivalente
+```
+
+Corre los 40 casos (~2 minutos, ~$0.013 con `gpt-5.4-nano`), imprime el reporte y guarda el
+detalle en `evals/results/`. Ver [Evals](#evals).
+
+**9. Verificar los cálculos del runner (sin llamar a la API)**
+
+```powershell
+python -m scripts.check_runner
+```
+
+## Evals
+
+El runner (`evals/runner.py`, un script simple: no usa pytest ni un framework) corre cada
+caso del dataset por el mismo `triage()` que usa la CLI y reporta:
+
+| Métrica | Qué responde |
+|---|---|
+| **Accuracy global** (estricta) | % de casos con la categoría esperada |
+| **Accuracy por categoría** | Si el sistema falla más en alguna categoría |
+| **JSON válido / válido al primer intento** | Si el prompt logra el formato o depende del retry |
+| **Accuracy por tag** | En qué tipo de caso falla (fronteras, typos, vagos...) |
+| **Matriz de confusión** | Qué categorías confunde entre sí |
+| **Alternativa aceptable** | En los casos ambiguos, si eligió la otra opción razonable (no suma) |
+| **Calibración** | Si la confidence es más alta cuando acierta que cuando falla |
+| **Costo, tokens y latencia** | Cuánto cuesta y cuánto tarda cada configuración |
+
+Cada corrida se guarda en `evals/results/<fecha>_<prompt>_<proveedor>_<modelo>.json`, con el
+resumen y el detalle de cada caso (incluidos `answer` y `actions`), y cada caso deja su línea en
+`data/metrics.jsonl` con `"source": "eval"`. Si el proveedor devuelve un error no reintentable
+(key inválida, sin saldo), la corrida se aborta en lugar de registrar 40 fallos iguales.
+
+Los cálculos del reporte se verifican con `python -m scripts.check_runner`, que usa respuestas
+simuladas con resultado conocido.
+
+La tabla comparativa de resultados se completa en la fase de comparación de prompts.
+
 ## Dataset de evaluación
 
 `evals/dataset.jsonl` tiene **40 casos etiquetados**, 10 por categoría. Cada línea:
@@ -205,7 +250,7 @@ Cada request agrega **una línea** a `data/metrics.jsonl` (append-only, una lín
 request, exitoso o no):
 
 ```json
-{"timestamp": "2026-11-07T15:16:16+00:00", "provider": "openai", "model": "gpt-5.4-nano",
+{"timestamp": "2026-11-07T15:16:16+00:00", "source": "cli", "provider": "openai", "model": "gpt-5.4-nano",
  "prompt": "v1_zero_shot", "attempts": 1, "api_retries": 0, "success": true, "error": null, "category": "account",
  "input_tokens": 515, "cached_input_tokens": 0, "output_tokens": 165, "total_tokens": 680,
  "latency_s": 4.239, "price_input_per_1m": 0.2, "price_output_per_1m": 1.25, "cost_usd": 0.00030925}
@@ -252,7 +297,9 @@ cost_usd = input_tokens / 1.000.000 × price_input_per_1m + output_tokens / 1.00
 │   └── schema.py          # contrato Pydantic de la respuesta + casos de prueba
 ├── evals/
 │   ├── dataset.jsonl      # 40 casos etiquetados
-│   └── dataset.py         # formato, carga validada y resumen de cobertura del dataset
+│   ├── dataset.py         # formato, carga validada y resumen de cobertura del dataset
+│   ├── runner.py          # corre el dataset y reporta score global, por categoría, etc.
+│   └── results/           # una corrida por archivo (resumen + detalle por caso)
 ├── data/
 │   └── metrics.jsonl      # una línea por request (se genera al usar la CLI)
 ├── prompts/
@@ -263,7 +310,8 @@ cost_usd = input_tokens / 1.000.000 × price_input_per_1m + output_tokens / 1.00
 │   ├── fake_llm.py        # proveedor simulado (FakeProvider) compartido por los checks
 │   ├── check_retry.py     # prueba del retry
 │   ├── check_metrics.py   # prueba de las métricas
-│   └── check_backoff.py   # prueba del backoff y la traducción de errores de los SDKs
+│   ├── check_backoff.py   # prueba del backoff y la traducción de errores de los SDKs
+│   └── check_runner.py    # prueba de los cálculos del runner de evals
 ├── docs/                  # enunciado y uso de IA en el desarrollo
 ├── .env.example           # plantilla de variables de entorno
 └── requirements.txt       # dependencias con versiones fijadas
@@ -298,7 +346,7 @@ cost_usd = input_tokens / 1.000.000 × price_input_per_1m + output_tokens / 1.00
 - [x] Métricas por request (`data/metrics.jsonl`)
 - [x] Abstracción `LLMProvider` con dos proveedores + backoff
 - [x] Dataset de evaluación (40 casos)
-- [ ] Runner de evals
+- [x] Runner de evals
 - [ ] Comparación de prompts (zero-shot vs few-shot)
 - [ ] Guardrails de entrada y salida
 - [ ] Evals adversariales y extra credit

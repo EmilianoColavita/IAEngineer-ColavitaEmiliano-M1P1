@@ -18,7 +18,7 @@ from pydantic import ValidationError
 
 from src import metrics
 from src.prompts import load_prompt
-from src.providers import LLMProvider, LLMResult, RetryableError, get_provider
+from src.providers import LLMProvider, LLMResult, ProviderError, RetryableError, get_provider
 from src.schema import TriageResponse
 
 DEFAULT_PROMPT = "v1_zero_shot"
@@ -161,53 +161,83 @@ def _run_with_retry(
     )
 
 
-def triage(
+@dataclass
+class TriageRun:
+    """Resultado completo de un request: la respuesta (o el error) + su línea de métricas."""
+
+    response: TriageResponse | None
+    record: dict  # la misma línea que se escribió en metrics.jsonl
+    error: Exception | None = None
+
+
+def run_triage(
     query: str,
     prompt_name: str = DEFAULT_PROMPT,
     provider: LLMProvider | None = None,
-) -> TriageResponse:
-    """Clasifica una consulta y devuelve la respuesta validada.
+    source: str = "cli",
+) -> TriageRun:
+    """Clasifica una consulta y devuelve respuesta + métricas, sin lanzar errores esperables.
 
-    `provider`: si no se pasa, se usa el de LLM_PROVIDER en el .env.
+    Pensada para quien necesita los números de cada request (el runner de evals).
+    TriageError y ProviderError quedan en `TriageRun.error` en lugar de lanzarse.
+    `source` ("cli" / "eval") permite distinguir el origen en metrics.jsonl.
     Cada request (exitoso o no) deja una línea en metrics.jsonl.
-    Lanza PromptError si el prompt no existe, TriageError si se agotan los intentos de
-    validación y ProviderError si falla el proveedor (incluido RetryableError agotado).
     """
-    prompt = load_prompt(prompt_name)
+    prompt = load_prompt(prompt_name)  # PromptError sí se lanza: es un error de uso
     provider = provider or get_provider()
     messages = [
         {"role": "system", "content": prompt.system},
         {"role": "user", "content": prompt.render_user(query)},
     ]
     stats = RequestStats()
-    result: TriageResponse | None = None
-    error: str | None = None
+    response: TriageResponse | None = None
+    error: Exception | None = None
     start = time.perf_counter()
 
     try:
-        result = _run_with_retry(provider, messages, stats)
-        return result
+        response = _run_with_retry(provider, messages, stats)
+    except (TriageError, ProviderError) as e:
+        error = e  # esperables: se devuelven, no se lanzan
     except Exception as e:
-        error = type(e).__name__
+        error = e  # inesperado (un bug): se registra y se relanza
         raise
     finally:
         # finally: se registra SIEMPRE, salga bien o mal. Los fallos también cuestan.
-        metrics.log_request(
-            {
-                "provider": provider.name,
-                "model": provider.model,
-                "prompt": prompt_name,
-                "attempts": stats.attempts,
-                "api_retries": stats.api_retries,
-                "success": result is not None,
-                "error": error,
-                "category": result.category if result else None,
-                "input_tokens": stats.input_tokens,
-                "cached_input_tokens": stats.cached_input_tokens,
-                "output_tokens": stats.output_tokens,
-                "total_tokens": stats.input_tokens + stats.output_tokens,
-                # incluye las esperas del backoff: es la latencia que vive el usuario
-                "latency_s": round(time.perf_counter() - start, 3),
-                **metrics.compute_cost(provider.model, stats.input_tokens, stats.output_tokens),
-            }
-        )
+        record = {
+            "source": source,
+            "provider": provider.name,
+            "model": provider.model,
+            "prompt": prompt_name,
+            "attempts": stats.attempts,
+            "api_retries": stats.api_retries,
+            "success": response is not None,
+            "error": type(error).__name__ if error else None,
+            "category": response.category if response else None,
+            "input_tokens": stats.input_tokens,
+            "cached_input_tokens": stats.cached_input_tokens,
+            "output_tokens": stats.output_tokens,
+            "total_tokens": stats.input_tokens + stats.output_tokens,
+            # incluye las esperas del backoff: es la latencia que vive el usuario
+            "latency_s": round(time.perf_counter() - start, 3),
+            **metrics.compute_cost(provider.model, stats.input_tokens, stats.output_tokens),
+        }
+        metrics.log_request(record)
+
+    return TriageRun(response, record, error)
+
+
+def triage(
+    query: str,
+    prompt_name: str = DEFAULT_PROMPT,
+    provider: LLMProvider | None = None,
+) -> TriageResponse:
+    """Clasifica una consulta y devuelve la respuesta validada (uso desde la CLI).
+
+    `provider`: si no se pasa, se usa el de LLM_PROVIDER en el .env.
+    Lanza PromptError si el prompt no existe, TriageError si se agotan los intentos de
+    validación y ProviderError si falla el proveedor (incluido RetryableError agotado).
+    """
+    run = run_triage(query, prompt_name, provider, source="cli")
+    if run.error:
+        raise run.error
+    return run.response

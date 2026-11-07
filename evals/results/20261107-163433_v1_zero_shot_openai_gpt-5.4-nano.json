@@ -1,0 +1,1318 @@
+{
+  "meta": {
+    "prompt": "v1_zero_shot",
+    "provider": "openai",
+    "model": "gpt-5.4-nano",
+    "cases": 40,
+    "dataset_full": true,
+    "started_at": "2026-11-07T16:33:17+00:00"
+  },
+  "summary": {
+    "n": 40,
+    "correct": 36,
+    "accuracy": 90.0,
+    "valid_json_pct": 100.0,
+    "first_try_pct": 100.0,
+    "per_category": {
+      "billing": {
+        "n": 10,
+        "correct": 9,
+        "accuracy": 90.0
+      },
+      "technical": {
+        "n": 10,
+        "correct": 9,
+        "accuracy": 90.0
+      },
+      "account": {
+        "n": 10,
+        "correct": 9,
+        "accuracy": 90.0
+      },
+      "other": {
+        "n": 10,
+        "correct": 9,
+        "accuracy": 90.0
+      }
+    },
+    "per_tag": {
+      "frontier": {
+        "n": 11,
+        "correct": 9,
+        "accuracy": 81.8
+      },
+      "clear": {
+        "n": 9,
+        "correct": 9,
+        "accuracy": 100.0
+      },
+      "informal": {
+        "n": 5,
+        "correct": 5,
+        "accuracy": 100.0
+      },
+      "regional": {
+        "n": 5,
+        "correct": 5,
+        "accuracy": 100.0
+      },
+      "typos": {
+        "n": 4,
+        "correct": 4,
+        "accuracy": 100.0
+      },
+      "long": {
+        "n": 4,
+        "correct": 3,
+        "accuracy": 75.0
+      },
+      "short": {
+        "n": 4,
+        "correct": 4,
+        "accuracy": 100.0
+      },
+      "angry": {
+        "n": 3,
+        "correct": 3,
+        "accuracy": 100.0
+      },
+      "multi_intent": {
+        "n": 2,
+        "correct": 1,
+        "accuracy": 50.0
+      },
+      "vague": {
+        "n": 2,
+        "correct": 2,
+        "accuracy": 100.0
+      },
+      "off_topic": {
+        "n": 2,
+        "correct": 2,
+        "accuracy": 100.0
+      }
+    },
+    "confusion": {
+      "billing": {
+        "billing": 9,
+        "account": 1
+      },
+      "technical": {
+        "technical": 9,
+        "billing": 1
+      },
+      "account": {
+        "account": 9,
+        "other": 1
+      },
+      "other": {
+        "other": 9,
+        "billing": 1
+      }
+    },
+    "acceptable": {
+      "cases": 5,
+      "correct": 3,
+      "acceptable_hits": 2
+    },
+    "calibration": {
+      "mean_confidence_correct": 0.738,
+      "mean_confidence_wrong": 0.672
+    },
+    "cost_usd_total": 0.012156,
+    "cost_usd_per_case": 0.00030389,
+    "input_tokens_avg": 529.625,
+    "output_tokens_avg": 158.375,
+    "latency_s_avg": 1.913,
+    "latency_s_max": 2.798,
+    "api_retries_total": 0,
+    "failures": [
+      {
+        "id": "billing-10",
+        "expected": "billing",
+        "predicted": "account",
+        "confidence": 0.55,
+        "acceptable_hit": true,
+        "query": "me llegó la factura con el CUIT mal y además el usuario de mi contadora no puede ver los reportes"
+      },
+      {
+        "id": "technical-03",
+        "expected": "technical",
+        "predicted": "billing",
+        "confidence": 0.9,
+        "acceptable_hit": false,
+        "query": "El sistema le está generando las facturas a mis clientes con el IVA mal calculado, les sale un 10,5% cuando tendría que ser 21%."
+      },
+      {
+        "id": "account-10",
+        "expected": "account",
+        "predicted": "other",
+        "confidence": 0.62,
+        "acceptable_hit": false,
+        "query": "Tenemos dos sucursales y cada una tiene su propia cuenta en Nubbix desde que empezamos. Ahora queremos manejar todo desde una sola cuenta, con usuarios para cada sucursal, pero sin perder el historial de ventas de ninguna. ¿Se puede unificar?"
+      },
+      {
+        "id": "other-08",
+        "expected": "other",
+        "predicted": "billing",
+        "confidence": 0.62,
+        "acceptable_hit": true,
+        "query": "si me suscribo, ¿puedo pagar con transferencia bancaria o solo con tarjeta?"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "billing-01",
+      "query": "Buenas, en el resumen de la tarjeta me aparecen dos cargos de Nubbix del mismo día y por el mismo monto. Uno lo tienen que devolver.",
+      "expected": "billing",
+      "acceptable": [],
+      "tags": [
+        "clear"
+      ],
+      "predicted": "billing",
+      "confidence": 0.92,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Hola, gracias por avisar. Por lo que comentás, parece haber un cargo duplicado en el resumen de tu tarjeta. Para revisarlo y ayudarte con el caso, necesito que nos compartas el comprobante o captura del resumen donde se vean ambos cargos (fecha, monto y últimos 4 dígitos de la tarjeta) y, si tenés, el ID de la transacción o referencia de cada cargo.",
+      "actions": [
+        "Solicitar al cliente captura del resumen con fecha, monto y últimos 4 dígitos; y referencias/IDs de transacción de ambos cargos.",
+        "Verificar en el sistema de Nubbix si existen dos transacciones duplicadas para la misma fecha/monto y usuario/empresa.",
+        "Confirmar cuál de las dos transacciones corresponde al cobro correcto y cuál es duplicado.",
+        "Abrir caso de billing para gestionar el reintegro/corrección según corresponda y registrar evidencias."
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 536,
+      "output_tokens": 205,
+      "latency_s": 2.798,
+      "cost_usd": 0.00036345
+    },
+    {
+      "id": "billing-02",
+      "query": "necesito que me reemitan la factura de octubre como factura A con los datos fiscales de la empresa, me la hicieron como consumidor final",
+      "expected": "billing",
+      "acceptable": [],
+      "tags": [
+        "clear"
+      ],
+      "predicted": "billing",
+      "confidence": 0.9,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Entendido! Podemos ayudarte a gestionar la reemisión de la factura de octubre con formato factura A y con los datos fiscales correctos de tu empresa. Para avanzar, necesitamos que nos confirmes los datos fiscales que deben figurar y el número de factura (o el comprobante) a reemitir.",
+      "actions": [
+        "Solicitar número de factura/comprobante de octubre y el CUIT/datos fiscales correctos para factura A",
+        "Verificar en el sistema el tipo de comprobante emitido (consumidor final) y el historial de la factura",
+        "Confirmar si aplica reemisión/corrección y qué campos deben actualizarse (razón social, domicilio fiscal, IVA, etc.)",
+        "Generar la reemisión con factura A y validar que los datos fiscales coincidan con la cuenta del cliente"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 535,
+      "output_tokens": 182,
+      "latency_s": 2.008,
+      "cost_usd": 0.0003345
+    },
+    {
+      "id": "billing-03",
+      "query": "me cobraron el plan pro pero yo tengo el basico q onda??",
+      "expected": "billing",
+      "acceptable": [],
+      "tags": [
+        "typos",
+        "informal"
+      ],
+      "predicted": "billing",
+      "confidence": 0.9,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Hola! Entiendo la situación. Para revisarlo necesito confirmar tu cuenta y el detalle del cobro: ¿podés compartir el correo con el que te registraste y, si tenés, la fecha y el monto del cargo del Plan Pro? Con eso verificamos si hubo un cambio de plan o un cobro duplicado.",
+      "actions": [
+        "Solicitar correo del cliente y datos del cargo (fecha, monto, medio de pago)",
+        "Verificar en el sistema el plan actual vs. el plan al momento del cobro",
+        "Revisar historial de cambios de plan y posibles cobros duplicados",
+        "Confirmar si corresponde ajuste/reintegro según la causa y documentar el caso"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 520,
+      "output_tokens": 157,
+      "latency_s": 1.895,
+      "cost_usd": 0.00030025
+    },
+    {
+      "id": "billing-04",
+      "query": "Quiero cambiar la tarjeta con la que se paga la suscripción porque la que tengo cargada se vence este mes.",
+      "expected": "billing",
+      "acceptable": [],
+      "tags": [
+        "frontier"
+      ],
+      "predicted": "billing",
+      "confidence": 0.9,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Claro! Podemos ayudarte a actualizar el medio de pago de tu suscripción. Para hacerlo, necesitaremos que nos confirmes los últimos 4 dígitos de la tarjeta actual y la fecha de vencimiento (si la tenés a mano), y luego te guiamos para cargar la nueva tarjeta en tu cuenta.",
+      "actions": [
+        "Verificar en el sistema el estado de la suscripción y el medio de pago actual (últimos 4 dígitos/fecha de vencimiento).",
+        "Confirmar con el cliente los datos necesarios para identificar la tarjeta y evitar errores.",
+        "Indicar el paso a paso para actualizar la tarjeta en la cuenta o realizar el cambio si aplica.",
+        "Confirmar que el nuevo medio de pago quedó activo y programar la verificación del próximo cobro."
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 529,
+      "output_tokens": 174,
+      "latency_s": 1.993,
+      "cost_usd": 0.0003233
+    },
+    {
+      "id": "billing-05",
+      "query": "ES LA TERCERA VEZ QUE ME COBRAN UN AUMENTO QUE NADIE ME AVISÓ. QUIERO UNA EXPLICACIÓN YA",
+      "expected": "billing",
+      "acceptable": [],
+      "tags": [
+        "angry"
+      ],
+      "predicted": "billing",
+      "confidence": 0.86,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Entiendo tu molestia. Para poder explicarte por qué se te cobraron esos aumentos y revisar si hubo algún cambio de plan o ajuste de suscripción sin aviso, necesito que nos compartas el correo con el que ingresas a Nubbix y las fechas/importes de los 3 cobros (o capturas del resumen de facturación). Con eso verificamos el motivo del cargo y el historial de tu plan.",
+      "actions": [
+        "Solicitar al cliente correo de la cuenta y detalle de los 3 cobros (fechas/importes o capturas).",
+        "Revisar en el sistema el historial de suscripción: cambios de plan, renovaciones, ajustes automáticos y eventos de facturación.",
+        "Confirmar si hubo notificaciones enviadas (email/in-app) y registrar evidencia.",
+        "Validar si corresponde corrección del cargo o explicación formal según el historial encontrado."
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 537,
+      "output_tokens": 195,
+      "latency_s": 2.158,
+      "cost_usd": 0.00035115
+    },
+    {
+      "id": "billing-06",
+      "query": "Oigan, ¿por qué el cargo de este mes me salió en dólares y no en pesos mexicanos? El banco me cobró comisión por eso.",
+      "expected": "billing",
+      "acceptable": [],
+      "tags": [
+        "regional"
+      ],
+      "predicted": "billing",
+      "confidence": 0.78,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Hola! Entiendo la preocupación. Para revisar por qué el cargo de este mes te aparece en dólares (y no en pesos mexicanos), necesito confirmar cómo se está cobrando tu suscripción y qué moneda tiene configurada tu cuenta. Con esos datos te indicamos el motivo y qué opciones tenés para evitar comisiones del banco.",
+      "actions": [
+        "Verificar la moneda de cobro configurada para la suscripción del cliente y el método de pago utilizado",
+        "Revisar el detalle del cargo del mes (moneda, tipo de cambio, proveedor de pagos)",
+        "Confirmar si existe opción de cobro en MXN para ese medio de pago y cuenta",
+        "Solicitar al cliente comprobante del cargo y/o el identificador de la transacción para rastreo"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 535,
+      "output_tokens": 171,
+      "latency_s": 1.875,
+      "cost_usd": 0.00032075
+    },
+    {
+      "id": "billing-07",
+      "query": "si me paso al plan anual ahora me descuentan lo que ya pague este mes o lo pierdo?",
+      "expected": "billing",
+      "acceptable": [],
+      "tags": [
+        "frontier",
+        "typos"
+      ],
+      "predicted": "billing",
+      "confidence": 0.78,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Gracias por tu consulta! Para el cambio a plan anual, normalmente se calcula un ajuste según el tiempo que ya tenés pago en el plan actual (no se “pierde” el pago ya realizado). Para confirmarte el descuento exacto en tu caso, necesito ver tu suscripción (plan actual y fecha de cobro).",
+      "actions": [
+        "Verificar en el sistema la suscripción del cliente (plan actual, fecha de próximo cobro y estado).",
+        "Confirmar la política de prorrateo/ajuste al upgrade a plan anual y el cálculo para la fecha actual.",
+        "Responder con el monto/porcentaje exacto del ajuste y la fecha del próximo cobro anual."
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 527,
+      "output_tokens": 157,
+      "latency_s": 1.948,
+      "cost_usd": 0.00030165
+    },
+    {
+      "id": "billing-08",
+      "query": "Hola, cómo están. Les cuento que tenemos una ferretería chica en el barrio y venimos usando Nubbix hace como un año, la verdad que bien. El tema es que por cuestiones económicas decidimos cerrar el local a fin de mes, así que quería dar de baja la suscripción y saber si me devuelven lo proporcional de los días que no voy a usar. Gracias!",
+      "expected": "billing",
+      "acceptable": [
+        "account"
+      ],
+      "tags": [
+        "long",
+        "frontier"
+      ],
+      "predicted": "billing",
+      "confidence": 0.78,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Hola, gracias por contarnos. Entiendo que van a cerrar el local a fin de mes y quieren dar de baja la suscripción. Para ayudarte con la baja y revisar si corresponde algún ajuste proporcional por los días no utilizados, necesito que confirmemos el plan que tenés y la fecha exacta de cierre. Con esos datos te indicamos los pasos a seguir desde tu cuenta.",
+      "actions": [
+        "Confirmar plan actual y estado de la suscripción del cliente en el sistema",
+        "Solicitar fecha exacta de cierre y si ya realizaron algún cambio de plan o cancelación",
+        "Verificar política de Nubbix sobre ajustes/reintegros por días no utilizados y si aplica en este caso",
+        "Indicar al cliente el procedimiento para dar de baja desde su cuenta (o gestionar la baja si corresponde)"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 585,
+      "output_tokens": 178,
+      "latency_s": 2.005,
+      "cost_usd": 0.0003395
+    },
+    {
+      "id": "billing-09",
+      "query": "factura septiembre?",
+      "expected": "billing",
+      "acceptable": [],
+      "tags": [
+        "short"
+      ],
+      "predicted": "billing",
+      "confidence": 0.45,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Hola! Para ayudarte con la factura de septiembre, ¿me confirmás por favor el nombre o correo con el que tenés la cuenta en Nubbix y si la necesitás como factura (PDF) o como comprobante de pago? Con esos datos te indico cómo ubicarla o gestionarla.",
+      "actions": [
+        "Solicitar datos de identificación (nombre/correo) y tipo de documento requerido (PDF factura vs comprobante).",
+        "Verificar en el sistema la existencia y estado de la factura de septiembre para la cuenta del cliente.",
+        "Confirmar si corresponde a suscripción o algún cargo adicional y reenviar/indicar descarga según corresponda."
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 509,
+      "output_tokens": 150,
+      "latency_s": 1.801,
+      "cost_usd": 0.0002893
+    },
+    {
+      "id": "billing-10",
+      "query": "me llegó la factura con el CUIT mal y además el usuario de mi contadora no puede ver los reportes",
+      "expected": "billing",
+      "acceptable": [
+        "account"
+      ],
+      "tags": [
+        "multi_intent"
+      ],
+      "predicted": "account",
+      "confidence": 0.55,
+      "correct": false,
+      "acceptable_hit": true,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Gracias por avisarnos. Veo dos temas: (1) la factura llegó con el CUIT incorrecto y (2) el usuario de tu contadora no tiene acceso a los reportes. Para ayudarte, necesitamos revisar ambos: la factura y los permisos del usuario.",
+      "actions": [
+        "Verificar en el sistema la factura emitida y confirmar el CUIT correcto del cliente para corregir el dato",
+        "Solicitar/confirmar el email del usuario de la contadora y el rol actual asignado",
+        "Revisar y ajustar permisos/roles para que el usuario pueda ver reportes",
+        "Confirmar si el problema es de un reporte específico o de toda la sección de reportes"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 529,
+      "output_tokens": 154,
+      "latency_s": 2.06,
+      "cost_usd": 0.0002983
+    },
+    {
+      "id": "technical-01",
+      "query": "Desde la actualización de anoche el módulo de stock no me deja guardar productos nuevos, el botón de guardar se queda girando y no pasa nada.",
+      "expected": "technical",
+      "acceptable": [],
+      "tags": [
+        "clear"
+      ],
+      "predicted": "technical",
+      "confidence": 0.92,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Gracias por avisar. Por lo que comentás, luego de la actualización el módulo de stock queda bloqueado al intentar guardar productos nuevos (el botón se queda cargando). Vamos a revisarlo como un posible error técnico de la app.",
+      "actions": [
+        "Solicitar al cliente captura del error/estado y el navegador (y versión) donde ocurre",
+        "Verificar en el sistema si hay incidentes post-actualización relacionados a Stock/guardar productos",
+        "Reproducir el caso con un producto nuevo en el entorno de pruebas y revisar logs del backend/front",
+        "Indicar al cliente pasos de diagnóstico básicos (limpiar caché, probar modo incógnito y otro navegador) si aplica"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 535,
+      "output_tokens": 155,
+      "latency_s": 1.784,
+      "cost_usd": 0.00030075
+    },
+    {
+      "id": "technical-02",
+      "query": "la app del celular se cierra sola apenas la abro, tengo android",
+      "expected": "technical",
+      "acceptable": [],
+      "tags": [
+        "clear",
+        "informal"
+      ],
+      "predicted": "technical",
+      "confidence": 0.9,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Gracias por avisar. Entiendo que la app en Android se cierra sola al abrirla. Para ayudarte a identificar la causa, necesito algunos datos: ¿te pasa con todas las cuentas o solo con una, y desde qué versión de Android estás? Mientras tanto, probá actualizar la app desde la tienda y reiniciar el teléfono.",
+      "actions": [
+        "Solicitar versión de Android, versión de la app Nubbix y si ocurre en todos los usuarios/dispositivos",
+        "Indicar pasos de diagnóstico: actualizar app, reiniciar, borrar caché/datos (si aplica) y verificar permisos",
+        "Revisar logs/telemetría del cliente si está disponible para cierres al inicio",
+        "Proponer prueba con otra red/dispositivo y recopilar captura del error (si aparece)"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 521,
+      "output_tokens": 175,
+      "latency_s": 1.946,
+      "cost_usd": 0.00032295
+    },
+    {
+      "id": "technical-03",
+      "query": "El sistema le está generando las facturas a mis clientes con el IVA mal calculado, les sale un 10,5% cuando tendría que ser 21%.",
+      "expected": "technical",
+      "acceptable": [],
+      "tags": [
+        "frontier"
+      ],
+      "predicted": "billing",
+      "confidence": 0.9,
+      "correct": false,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Gracias por avisarnos. Por lo que comentás, el problema está en el cálculo del IVA al generar las facturas (figura 10,5% en lugar de 21%). Para revisarlo, necesitamos verificar la configuración fiscal de tu cuenta y cómo se está aplicando el impuesto en las facturas.",
+      "actions": [
+        "Revisar la configuración fiscal/impositiva de la cuenta (país, alícuotas, tipo de IVA) y si está configurado correctamente el 21%",
+        "Verificar reglas de cálculo de IVA en la plantilla/plantilla de facturación y en los productos/servicios (impuesto asignado)",
+        "Solicitar ejemplos de 2-3 facturas afectadas (número, fecha, monto base y total) para comparar el cálculo",
+        "Confirmar si hay algún ajuste por tipo de cliente/condición fiscal o configuración de moneda/porcentaje que esté aplicando 10,5%"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 539,
+      "output_tokens": 208,
+      "latency_s": 2.25,
+      "cost_usd": 0.0003678
+    },
+    {
+      "id": "technical-04",
+      "query": "Cuando entro con mi usuario me aparece la pantalla en blanco, pero mi socio entra bien desde su computadora.",
+      "expected": "technical",
+      "acceptable": [],
+      "tags": [
+        "frontier"
+      ],
+      "predicted": "technical",
+      "confidence": 0.78,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Gracias por avisar. Si al iniciar sesión te queda la pantalla en blanco mientras a tu socio le funciona, suele ser un problema de tu navegador/dispositivo o de sesión/caché. Te voy a pedir algunos datos para revisarlo y guiarte con pasos de diagnóstico.",
+      "actions": [
+        "Solicitar al cliente: navegador y versión, sistema operativo, si ocurre en modo incógnito y si pasa con otro navegador/dispositivo",
+        "Verificar en el backend si hay errores de carga para el usuario (logs/telemetría) y si hay fallas asociadas a su sesión",
+        "Indicar al agente que revise si el usuario tiene algún permiso/rol particular que dispare una carga fallida (comparar con el socio que entra bien)",
+        "Proponer pasos: limpiar caché/cookies, desactivar extensiones, probar otro navegador y confirmar si el problema persiste"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 526,
+      "output_tokens": 194,
+      "latency_s": 2.524,
+      "cost_usd": 0.0003477
+    },
+    {
+      "id": "technical-05",
+      "query": "no me inprime los tikets desde ayer, la impresora fiscal esta conectada y prendida",
+      "expected": "technical",
+      "acceptable": [],
+      "tags": [
+        "typos"
+      ],
+      "predicted": "technical",
+      "confidence": 0.78,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Gracias por avisar. Si la impresora fiscal está conectada y encendida, el problema puede estar en la impresión de los tickets desde Nubbix (configuración, cola de impresión o conexión con el dispositivo). Para revisarlo, necesito algunos datos: ¿desde qué dispositivo/navegador imprimís y qué modelo de impresora fiscal es? También confirmame si al intentar imprimir aparece algún mensaje de error o si queda en “pendiente”.",
+      "actions": [
+        "Solicitar al cliente dispositivo/navegador y modelo de impresora fiscal",
+        "Verificar en el sistema si los tickets generados desde ayer quedaron en cola/pendientes de impresión",
+        "Revisar configuración de impresora fiscal en la cuenta (puerto/driver, estado de integración)",
+        "Confirmar si hay errores en logs del servicio de impresión o fallas de sincronización"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 526,
+      "output_tokens": 189,
+      "latency_s": 1.927,
+      "cost_usd": 0.00034145
+    },
+    {
+      "id": "technical-06",
+      "query": "llevo 3 horas sin poder facturar y tengo el local lleno de gente!!! esto es un desastre, solucionenlo",
+      "expected": "technical",
+      "acceptable": [],
+      "tags": [
+        "angry",
+        "frontier"
+      ],
+      "predicted": "technical",
+      "confidence": 0.78,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Lamentamos el inconveniente. Para ayudarte a resolverlo cuanto antes, necesito que nos confirmes qué error te aparece al intentar facturar (mensaje exacto o captura) y en qué comprobante/empresa estás trabajando. Mientras tanto, probá recargar la página y verificar que tu conexión a internet esté estable.",
+      "actions": [
+        "Solicitar mensaje de error exacto/captura y datos de empresa (ID), tipo de comprobante y hora del incidente",
+        "Revisar logs/monitoreo de la API de facturación para fallas o degradación en el período reportado",
+        "Verificar estado de integraciones necesarias para facturar (p. ej., AFIP/servicios externos si aplica) y si hay incidentes activos",
+        "Confirmar si el problema es por usuario/rol o por toda la cuenta (prueba con otro usuario)"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 531,
+      "output_tokens": 190,
+      "latency_s": 2.157,
+      "cost_usd": 0.0003437
+    },
+    {
+      "id": "technical-07",
+      "query": "Buenas tardes, el reporte de cierre de caja me está saliendo con cifras que no cuadran con lo que vendí hoy, ¿me colaboran por fa?",
+      "expected": "technical",
+      "acceptable": [],
+      "tags": [
+        "regional"
+      ],
+      "predicted": "technical",
+      "confidence": 0.72,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Buenas tardes! Claro, con gusto te ayudo. Para revisar por qué el reporte de cierre de caja no cuadra con tus ventas de hoy, necesito que me compartas la fecha del cierre y una captura o el detalle de las cifras que te aparecen (ventas, totales y cualquier diferencia).",
+      "actions": [
+        "Solicitar fecha del cierre y capturas/detalle del reporte (totales, ventas, medios de pago) y del registro de ventas del día",
+        "Verificar en el sistema si hay desajustes por zona horaria, cortes de caja o filtros del reporte",
+        "Revisar si existen operaciones pendientes/no conciliadas o integraciones de pago que no sincronizaron correctamente",
+        "Confirmar configuración del reporte (rango de fechas, sucursal/usuario, medios de pago) y reproducir el cálculo con los mismos parámetros"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 538,
+      "output_tokens": 188,
+      "latency_s": 2.018,
+      "cost_usd": 0.0003426
+    },
+    {
+      "id": "technical-08",
+      "query": "algo raro pasa con el sistema desde hoy",
+      "expected": "technical",
+      "acceptable": [],
+      "tags": [
+        "vague"
+      ],
+      "predicted": "technical",
+      "confidence": 0.2,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Hola! Lamento el inconveniente. Para poder ayudarte, ¿podés indicarme qué está pasando exactamente desde hoy (por ejemplo: error que aparece, qué función no funciona, desde qué dispositivo/navegador y si afecta a todos los usuarios o solo a uno)?",
+      "actions": [
+        "Solicitar detalles: mensaje de error, URL/función afectada, navegador/dispositivo, usuario afectado y desde qué hora comenzó.",
+        "Verificar estado del sistema/alertas internas para incidentes desde hoy.",
+        "Revisar logs de la cuenta del cliente (si se comparte) y patrones de fallas (autenticación, reportes, integraciones).",
+        "Proponer pasos de diagnóstico básicos (limpiar caché, probar modo incógnito, confirmar versión/navegador) si aplica."
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 514,
+      "output_tokens": 180,
+      "latency_s": 2.035,
+      "cost_usd": 0.0003278
+    },
+    {
+      "id": "technical-09",
+      "query": "Les escribo porque desde la semana pasada el sistema anda lentísimo. Al principio pensé que era mi internet, pero probé desde otra conexión y pasa lo mismo. Cargar la lista de clientes tarda como un minuto y a veces directamente se corta. Somos 3 personas usando el sistema al mismo tiempo, no sé si eso influye.",
+      "expected": "technical",
+      "acceptable": [],
+      "tags": [
+        "long"
+      ],
+      "predicted": "technical",
+      "confidence": 0.86,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Gracias por avisarnos. Por lo que comentás, parece un problema de rendimiento (lentitud y cortes) al cargar la lista de clientes, incluso probando con otra conexión. Para revisarlo, necesitamos algunos datos de tu cuenta y del momento del fallo.",
+      "actions": [
+        "Solicitar al cliente: correo/empresa en Nubbix, horario aproximado del problema y si ocurre en todas las pantallas o solo en “lista de clientes”.",
+        "Pedir capturas o mensajes de error (si aparecen) y el navegador/dispositivo desde el que acceden.",
+        "Verificar en el sistema si hay incidentes o degradación de rendimiento en las fechas/horas reportadas.",
+        "Revisar logs/telemetría de la carga de “clientes” para identificar cuellos de botella o errores intermitentes.",
+        "Confirmar si hay algún patrón por cantidad de usuarios simultáneos y recomendar ajustes básicos (p. ej., caché/navegador) mientras se investiga."
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 573,
+      "output_tokens": 215,
+      "latency_s": 2.257,
+      "cost_usd": 0.00038335
+    },
+    {
+      "id": "technical-10",
+      "query": "error 403 al exportar",
+      "expected": "technical",
+      "acceptable": [
+        "account"
+      ],
+      "tags": [
+        "short",
+        "frontier"
+      ],
+      "predicted": "technical",
+      "confidence": 0.72,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Gracias por avisar! Para ayudarte a resolver el error 403 al exportar, necesito confirmar qué estás intentando exportar (facturas/reportes/otro) y desde qué pantalla o enlace te aparece el error. También, si podés, compartime el mensaje completo del 403 y el correo/usuario con el que estás intentando exportar.",
+      "actions": [
+        "Solicitar al cliente: tipo de exportación, pantalla/origen, mensaje completo del 403 y usuario/correo afectado",
+        "Verificar permisos/roles del usuario para la funcionalidad de exportación en el entorno del cliente",
+        "Revisar logs del backend para el request de exportación (endpoint, recurso, causa del 403)",
+        "Confirmar si hay cambios recientes de plan/roles o restricciones de acceso que disparen el 403"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 512,
+      "output_tokens": 182,
+      "latency_s": 1.958,
+      "cost_usd": 0.0003299
+    },
+    {
+      "id": "account-01",
+      "query": "¿Cómo le saco el acceso a un empleado que ya no trabaja con nosotros?",
+      "expected": "account",
+      "acceptable": [],
+      "tags": [
+        "clear"
+      ],
+      "predicted": "account",
+      "confidence": 0.9,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Claro! Para quitar el acceso de un empleado que ya no trabaja con ustedes, necesito revisar si lo que desean es desactivar su usuario o eliminarlo del equipo. En general se puede gestionar desde la sección de Usuarios/Equipo, donde se puede inhabilitar el acceso o remover el rol asignado.",
+      "actions": [
+        "Confirmar si el cliente quiere desactivar el usuario o eliminarlo definitivamente.",
+        "Indicar la ruta exacta en Nubbix (Usuarios/Equipo) según el rol del titular.",
+        "Solicitar el correo o nombre del empleado para ubicar el usuario y verificar su estado actual.",
+        "Verificar si hay integraciones o permisos asociados que deban reasignarse (p. ej., facturación/reportes)."
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 520,
+      "output_tokens": 163,
+      "latency_s": 1.806,
+      "cost_usd": 0.00030775
+    },
+    {
+      "id": "account-02",
+      "query": "quiero que mi encargado pueda cargar ventas pero que no vea los reportes de ganancias, se puede?",
+      "expected": "account",
+      "acceptable": [],
+      "tags": [
+        "clear",
+        "informal"
+      ],
+      "predicted": "account",
+      "confidence": 0.86,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Sí, se puede configurar el acceso para que tu encargado cargue ventas sin ver los reportes de ganancias. Para confirmarlo, necesito revisar qué rol/permisos tiene actualmente y qué reportes específicos querés ocultar.",
+      "actions": [
+        "Verificar el rol actual del encargado y su nivel de permisos en Nubbix",
+        "Confirmar qué reportes de “ganancias” deben ocultarse (nombres exactos/secciones)",
+        "Indicar al cliente los pasos para ajustar permisos o realizar el cambio si corresponde",
+        "Solicitar si el encargado debe poder ver otros reportes (facturación, ventas, etc.) para evitar bloqueos no deseados"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 526,
+      "output_tokens": 147,
+      "latency_s": 1.705,
+      "cost_usd": 0.00028895
+    },
+    {
+      "id": "account-03",
+      "query": "Activé la verificación en dos pasos y después cambié de celular, ahora no me llegan los códigos para entrar.",
+      "expected": "account",
+      "acceptable": [],
+      "tags": [
+        "frontier"
+      ],
+      "predicted": "account",
+      "confidence": 0.9,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Entiendo: activaste la verificación en dos pasos y al cambiar de celular ya no te llegan los códigos. Para ayudarte a recuperar el acceso, necesito verificar tu cuenta y confirmar el nuevo número o el método alternativo de 2FA.",
+      "actions": [
+        "Solicitar datos de verificación de la cuenta (correo/razón social) y confirmar identidad del titular",
+        "Revisar en el panel de Nubbix el estado/configuración de 2FA del usuario y el número registrado",
+        "Indicar el proceso para actualizar el número de 2FA o habilitar un método alternativo (si aplica)",
+        "Confirmar si existe opción de recuperación sin código y guiar al cliente paso a paso"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 529,
+      "output_tokens": 158,
+      "latency_s": 1.926,
+      "cost_usd": 0.0003033
+    },
+    {
+      "id": "account-04",
+      "query": "kiero cambiar el nombre de la empresa q aparece en la cuenta xq nos cambiamos de razon social",
+      "expected": "account",
+      "acceptable": [],
+      "tags": [
+        "typos",
+        "frontier"
+      ],
+      "predicted": "account",
+      "confidence": 0.86,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Claro! Puedo ayudarte a cambiar el nombre de la empresa que aparece en tu cuenta por el cambio de razón social. Para hacerlo, necesito que me confirmes el nombre nuevo y si también hubo cambios en datos fiscales (por ejemplo, RUC/NIT o dirección).",
+      "actions": [
+        "Confirmar con el cliente el nombre de la empresa nuevo y si hay cambios en datos fiscales (RUC/NIT, dirección).",
+        "Verificar en el sistema qué campos se pueden actualizar y si requiere validación adicional.",
+        "Actualizar el nombre de la empresa en la cuenta y revisar que se refleje en facturación y reportes."
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 527,
+      "output_tokens": 143,
+      "latency_s": 1.659,
+      "cost_usd": 0.00028415
+    },
+    {
+      "id": "account-05",
+      "query": "che, cómo hago para que mi socio también sea administrador?",
+      "expected": "account",
+      "acceptable": [],
+      "tags": [
+        "informal",
+        "regional"
+      ],
+      "predicted": "account",
+      "confidence": 0.86,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Hola! Para que tu socio también sea administrador, necesitás ajustar los permisos del usuario en Nubbix. Decime si el socio ya tiene una cuenta creada en tu workspace (con su email) y te indico los pasos exactos según tu caso.",
+      "actions": [
+        "Confirmar si el socio ya tiene usuario creado en el workspace (email)",
+        "Indicar pasos para cambiar rol a Administrador desde la sección de Usuarios/Permisos",
+        "Verificar si el rol actual del solicitante permite gestionar administradores"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 517,
+      "output_tokens": 121,
+      "latency_s": 1.511,
+      "cost_usd": 0.00025465
+    },
+    {
+      "id": "account-06",
+      "query": "necesito dar de alta 2 usuarios nuevos y que también me expliquen por qué este mes pagué más que el anterior",
+      "expected": "account",
+      "acceptable": [
+        "billing"
+      ],
+      "tags": [
+        "multi_intent"
+      ],
+      "predicted": "account",
+      "confidence": 0.55,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Claro! Puedo ayudarte con el alta de 2 usuarios nuevos y también revisar el motivo por el cual este mes pagaste más que el anterior. Para avanzar, necesitamos que nos confirmes los correos de esos usuarios y el número de factura o el período de cobro que te generó el aumento.",
+      "actions": [
+        "Solicitar correos/nombres de los 2 usuarios y el rol/permisos requeridos para el alta.",
+        "Pedir número de factura o período de cobro y monto del mes actual vs. mes anterior.",
+        "Revisar en el sistema posibles causas del aumento (cambio de plan, cargos adicionales, usuarios, impuestos o medios de pago).",
+        "Confirmar con el cliente si hubo cambios en la cuenta durante el período (altas/bajas, integraciones, ajustes)."
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 532,
+      "output_tokens": 180,
+      "latency_s": 2.246,
+      "cost_usd": 0.0003314
+    },
+    {
+      "id": "account-07",
+      "query": "olvidé mi contraseña",
+      "expected": "account",
+      "acceptable": [],
+      "tags": [
+        "short",
+        "clear"
+      ],
+      "predicted": "account",
+      "confidence": 0.9,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Entendido! Para recuperar tu contraseña en Nubbix, usá la opción “¿Olvidaste tu contraseña?” en la pantalla de inicio de sesión y seguí los pasos del correo. Si no te llega el email, decime con qué correo te registraste y lo revisamos.",
+      "actions": [
+        "Confirmar el correo con el que se registró el cliente y verificar si hay emails de recuperación pendientes/rebotados.",
+        "Indicar cómo usar “¿Olvidaste tu contraseña?” y revisar configuración de acceso si el usuario no puede recibir el correo."
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 511,
+      "output_tokens": 131,
+      "latency_s": 1.821,
+      "cost_usd": 0.00026595
+    },
+    {
+      "id": "account-08",
+      "query": "ALGUIEN ENTRÓ A MI CUENTA Y CAMBIÓ LOS PRECIOS DE TODOS LOS PRODUCTOS, NO FUI YO!!",
+      "expected": "account",
+      "acceptable": [],
+      "tags": [
+        "angry"
+      ],
+      "predicted": "account",
+      "confidence": 0.78,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Lamento lo ocurrido. Para proteger tu cuenta, necesitamos revisar accesos y cambios de configuración. Por favor, confirmame si tenés acceso al correo con el que iniciás sesión y si podés ingresar ahora mismo a Nubbix.",
+      "actions": [
+        "Verificar historial de accesos (IP/dispositivo/fecha) y cambios de configuración relacionados con precios",
+        "Solicitar al cliente confirmación de acceso actual y correo asociado para validar identidad",
+        "Recomendar cambio inmediato de contraseña y revisar/invalidar sesiones activas si aplica",
+        "Revisar si hubo cambios de plan o permisos de usuarios con rol de administración",
+        "Confirmar el estado actual de precios y revertir/ajustar si corresponde según el registro de cambios"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 534,
+      "output_tokens": 162,
+      "latency_s": 1.765,
+      "cost_usd": 0.0003093
+    },
+    {
+      "id": "account-09",
+      "query": "Hola, necesito traspasar la cuenta a nombre de mi hermano porque él se va a hacer cargo del negocio po",
+      "expected": "account",
+      "acceptable": [],
+      "tags": [
+        "regional"
+      ],
+      "predicted": "account",
+      "confidence": 0.78,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Hola! Entiendo. Para poder traspasar la cuenta a nombre de tu hermano, necesito que me confirmes algunos datos: el correo con el que está registrada la cuenta actual, el nombre y documento (o razón social) de tu hermano y su correo para el nuevo titular. Con eso te indicamos los pasos a seguir.",
+      "actions": [
+        "Solicitar correo actual del titular y datos del nuevo titular (nombre/razón social y documento)",
+        "Verificar si el cambio de titular requiere validación documental en el sistema",
+        "Confirmar si el nuevo titular debe quedar como usuario principal y si hay que ajustar permisos/roles",
+        "Indicar al cliente el flujo de traspaso y qué información debe aportar"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 529,
+      "output_tokens": 160,
+      "latency_s": 1.769,
+      "cost_usd": 0.0003058
+    },
+    {
+      "id": "account-10",
+      "query": "Tenemos dos sucursales y cada una tiene su propia cuenta en Nubbix desde que empezamos. Ahora queremos manejar todo desde una sola cuenta, con usuarios para cada sucursal, pero sin perder el historial de ventas de ninguna. ¿Se puede unificar?",
+      "expected": "account",
+      "acceptable": [],
+      "tags": [
+        "long"
+      ],
+      "predicted": "other",
+      "confidence": 0.62,
+      "correct": false,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Gracias por contarnos! Sí, en muchos casos se puede unificar la operación en una sola cuenta y mantener usuarios por sucursal. Para no perder el historial de ventas, necesitamos revisar cómo están cargados los datos en cada cuenta y qué tipo de unificación aplica en su caso. ¿Podés indicarnos si las dos cuentas tienen el mismo tipo de plan y si las ventas ya están registradas en Nubbix (no solo en integraciones externas)?",
+      "actions": [
+        "Confirmar si el cliente quiere migrar/mergear dos cuentas a una sola manteniendo historial de ventas.",
+        "Solicitar IDs de las dos cuentas y el correo/titular de cada una para validar permisos y alcance.",
+        "Verificar si hay integraciones de pago o sincronizaciones activas en ambas cuentas.",
+        "Revisar si el historial de ventas está en Nubbix (y en qué módulos) para definir el método de unificación.",
+        "Proponer el flujo de trabajo para crear usuarios por sucursal dentro de la cuenta unificada sin afectar reportes existentes."
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 558,
+      "output_tokens": 227,
+      "latency_s": 2.369,
+      "cost_usd": 0.00039535
+    },
+    {
+      "id": "other-01",
+      "query": "¿Tienen algún curso o capacitación para aprender a usar el sistema?",
+      "expected": "other",
+      "acceptable": [],
+      "tags": [
+        "clear"
+      ],
+      "predicted": "other",
+      "confidence": 0.78,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Hola! Sí, contamos con capacitaciones para ayudarte a aprender a usar Nubbix. Para indicarte la opción más adecuada, ¿me confirmás si ya tenés una cuenta activa y qué rol usás (por ejemplo: admin/contabilidad/operaciones)?",
+      "actions": [
+        "Confirmar si existen cursos/capacitaciones vigentes y su modalidad (webinar, videos, onboarding)",
+        "Solicitar al cliente rol y nivel de uso para recomendar el recurso correcto",
+        "Compartir links o pasos de acceso a la capacitación dentro de Nubbix"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 519,
+      "output_tokens": 130,
+      "latency_s": 1.581,
+      "cost_usd": 0.0002663
+    },
+    {
+      "id": "other-02",
+      "query": "Quisiera saber cuánto sale el plan para 5 usuarios",
+      "expected": "other",
+      "acceptable": [],
+      "tags": [
+        "clear"
+      ],
+      "predicted": "other",
+      "confidence": 0.62,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Gracias por tu consulta! Para decirte el costo exacto del plan para 5 usuarios, necesito que me confirmes en qué país estás y si ya tenés alguna integración o medio de pago activo en Nubbix. Con esos datos te indico el plan más conveniente y su precio.",
+      "actions": [
+        "Confirmar país del cliente y moneda",
+        "Consultar en el sistema la tarifa vigente para 5 usuarios y planes disponibles",
+        "Verificar si el cliente tiene integraciones/medio de pago activo para recomendar el plan adecuado"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 518,
+      "output_tokens": 122,
+      "latency_s": 1.868,
+      "cost_usd": 0.0002561
+    },
+    {
+      "id": "other-03",
+      "query": "cuál es la capital de Francia?",
+      "expected": "other",
+      "acceptable": [],
+      "tags": [
+        "off_topic"
+      ],
+      "predicted": "other",
+      "confidence": 0.05,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Hola! La capital de Francia es París. Si tu consulta era sobre Nubbix, contanos qué necesitas y te ayudo con gusto.",
+      "actions": [],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 513,
+      "output_tokens": 50,
+      "latency_s": 1.207,
+      "cost_usd": 0.0001651
+    },
+    {
+      "id": "other-04",
+      "query": "me podés ayudar a escribir un mail para mi proveedor reclamándole un pedido que no llegó?",
+      "expected": "other",
+      "acceptable": [],
+      "tags": [
+        "off_topic"
+      ],
+      "predicted": "other",
+      "confidence": 0.35,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Claro! Puedo ayudarte a redactar el mail para reclamar un pedido que no llegó. Para dejarlo bien, decime por favor: número de pedido/compra, fecha de compra, medio de pago (si aplica), transportista o empresa de envío, número de seguimiento (si tenés) y el plazo de entrega prometido. Con eso te armo el texto listo para enviar.",
+      "actions": [
+        "Solicitar al cliente los datos del pedido (número, fechas, proveedor/transportista, tracking y plazo prometido) para redactar el mail.",
+        "Proponer un borrador de correo con reclamo formal y solicitud de verificación/estado del envío."
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 524,
+      "output_tokens": 154,
+      "latency_s": 1.857,
+      "cost_usd": 0.0002973
+    },
+    {
+      "id": "other-05",
+      "query": "hola",
+      "expected": "other",
+      "acceptable": [],
+      "tags": [
+        "short",
+        "vague"
+      ],
+      "predicted": "other",
+      "confidence": 0.2,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Hola! 😊 Para poder ayudarte, ¿podés contar qué necesitas hacer en Nubbix (por ejemplo: facturación, reportes, integración de pagos o acceso de usuarios)?",
+      "actions": [],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 507,
+      "output_tokens": 58,
+      "latency_s": 1.356,
+      "cost_usd": 0.0001739
+    },
+    {
+      "id": "other-06",
+      "query": "buen día, solo quería decirles que la nueva pantalla de ventas quedó buenísima 👏👏",
+      "expected": "other",
+      "acceptable": [],
+      "tags": [
+        "informal"
+      ],
+      "predicted": "other",
+      "confidence": 0.9,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Hola! Gracias por tu mensaje y por el feedback 😊 Nos alegra mucho saber que la nueva pantalla de ventas te quedó bien. Si en algún momento detectás algún detalle a mejorar o tenés sugerencias, contanos y lo revisamos.",
+      "actions": [],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 526,
+      "output_tokens": 70,
+      "latency_s": 1.347,
+      "cost_usd": 0.0001927
+    },
+    {
+      "id": "other-07",
+      "query": "¿Nubbix funciona sin internet? La semana que viene voy a vender en una feria donde no hay señal.",
+      "expected": "other",
+      "acceptable": [],
+      "tags": [
+        "frontier"
+      ],
+      "predicted": "other",
+      "confidence": 0.78,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Nubbix es un SaaS y requiere conexión a internet para funcionar y para acceder a tus datos. Si vas a estar sin señal, necesitás contar con alguna alternativa de conectividad (por ejemplo, datos móviles o un punto de acceso) para poder usar el sistema durante la feria. Si querés, decime qué tareas necesitás hacer (facturar, ver reportes, etc.) y te orientamos con la mejor opción.",
+      "actions": [
+        "Confirmar si Nubbix ofrece algún modo offline o caché de datos y documentar limitaciones",
+        "Pedir al cliente qué funcionalidades necesita usar en la feria para sugerir la alternativa de conectividad adecuada"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 528,
+      "output_tokens": 150,
+      "latency_s": 1.832,
+      "cost_usd": 0.0002931
+    },
+    {
+      "id": "other-08",
+      "query": "si me suscribo, ¿puedo pagar con transferencia bancaria o solo con tarjeta?",
+      "expected": "other",
+      "acceptable": [
+        "billing"
+      ],
+      "tags": [
+        "frontier"
+      ],
+      "predicted": "billing",
+      "confidence": 0.62,
+      "correct": false,
+      "acceptable_hit": true,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Hola! En Nubbix podés pagar la suscripción con tarjeta. Para confirmar si también está disponible el pago por transferencia bancaria en tu caso, decime en qué país estás y si ya tenés una cuenta creada (o el correo con el que te registrás).",
+      "actions": [
+        "Confirmar disponibilidad de pago por transferencia bancaria según país y método de cobro habilitado para la cuenta del cliente.",
+        "Solicitar país y correo de registro para validar opciones de medios de pago."
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 523,
+      "output_tokens": 116,
+      "latency_s": 1.634,
+      "cost_usd": 0.0002496
+    },
+    {
+      "id": "other-09",
+      "query": "¿Tienen distribuidores en Guadalajara? Me interesaría revender el sistema a mis clientes.",
+      "expected": "other",
+      "acceptable": [],
+      "tags": [
+        "regional"
+      ],
+      "predicted": "other",
+      "confidence": 0.78,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Hola! Gracias por tu interés en Nubbix. Para confirmar si contamos con distribuidores en Guadalajara y opciones de revender el sistema, te pido que nos compartas tu nombre, empresa y datos de contacto (correo y teléfono) para derivarte con el equipo comercial.",
+      "actions": [
+        "Solicitar datos del cliente (nombre, empresa, correo y teléfono) y derivar al equipo comercial para validar esquema de distribuidores en Guadalajara y programa de revendedores."
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 524,
+      "output_tokens": 112,
+      "latency_s": 1.545,
+      "cost_usd": 0.0002448
+    },
+    {
+      "id": "other-10",
+      "query": "Somos una cadena de farmacias con 12 locales y estamos evaluando cambiar de sistema. Necesitaríamos saber si manejan control de vencimientos por lote, si tienen integración con obras sociales y si ofrecen migración de datos desde nuestro sistema actual. ¿Podemos agendar una demo?",
+      "expected": "other",
+      "acceptable": [],
+      "tags": [
+        "long"
+      ],
+      "predicted": "other",
+      "confidence": 0.78,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Gracias por contactarnos! Podemos ayudarte con esa evaluación. Para confirmarte si Nubbix maneja control de vencimientos por lote, si cuenta con integración con obras sociales y cómo funciona la migración de datos desde tu sistema actual, te propongo agendar una demo con nuestro equipo para revisar tu caso y requisitos. ¿En qué horario te queda mejor y en qué país operan?",
+      "actions": [
+        "Confirmar capacidades: control de vencimientos por lote y gestión por lote",
+        "Verificar si existe integración con obras sociales (y condiciones/alcance)",
+        "Revisar el proceso de migración de datos desde el sistema actual (formatos, mapeo, alcance)",
+        "Coordinar agenda de demo y recopilar datos mínimos del cliente (país, sistema actual, volumen de datos, necesidades)"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 563,
+      "output_tokens": 182,
+      "latency_s": 2.323,
+      "cost_usd": 0.0003401
+    }
+  ]
+}

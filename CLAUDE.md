@@ -163,8 +163,8 @@ Flujo: `consulta → guardrail entrada → prompt YAML → LLMProvider → parse
   `main.py`: `--provider`. Checks: `FakeProvider` implementa el contrato; `check_backoff` (19 OK,
   incluye excepciones reales de ambos SDKs). Verificado real: ambos proveedores, cambio por
   `LLM_PROVIDER` sin flag, y retry multi-turn con Gemini.
-- **Fase actual: 6 (Dataset).** Borrador hecho por Claude (decisión de Emiliano: opción b),
-  **falta que Emiliano revise y re-etiquete cada caso**, y commit. `evals/dataset.jsonl`: 40
+- Fase 6 (Dataset): **completada y commiteada**. Borrador hecho por Claude (opción b), revisado
+  por Emiliano. `evals/dataset.jsonl`: 40
   casos, 10 por categoría, sin portugués (decisión de Emiliano). Campos: id
   (`<categoria>-NN`), query, expected_category, acceptable_categories (solo 5 casos
   multi-intención/ambiguos; el enunciado no lo prohíbe; el score principal es ESTRICTO y la
@@ -174,6 +174,23 @@ Flujo: `consulta → guardrail entrada → prompt YAML → LLMProvider → parse
   errores), chequeo de contaminación vs líneas "Consulta:" de los prompts (difflib ≥ 0.6),
   resumen `python -m evals.dataset`. `Category` se extrajo en `src/schema.py` como única
   fuente de verdad. Pendiente: registrar en `docs/ai-usage.md` que el dataset lo generó IA.
+- **Fase actual: 7 (Runner de evals).** Implementada y verificada; falta que Emiliano la revise
+  y commitee. Decisiones de Emiliano: resultados SE VERSIONAN en `evals/results/`; soportar
+  también `python evals/runner.py` (shim de sys.path); en fase 7 correr solo v1/OpenAI.
+  `src/triage.py`: `run_triage(query, prompt, provider, source) -> TriageRun(response, record,
+  error)` no lanza TriageError/ProviderError (los devuelve); `triage()` es un wrapper que los
+  lanza (CLI sin cambios). Métricas con campo `source` ("cli"/"eval"). `get_provider(name,
+  model)`. `evals/runner.py`: `evaluate()` (aborta con `AbortRun` ante ProviderError no
+  reintentable), `summarize()` (accuracy estricta global/categoría/tag, % JSON válido, % primer
+  intento, matriz de confusión, hits de alternativa aceptable aparte, calibración, costo,
+  tokens, latencia, fallos), `print_report()`, `save_results()`. Flags: --prompt --provider
+  --model --limit. `scripts/check_runner.py` (11 OK) valida las cuentas con FakeProvider.
+  **Resultado real v1 / openai gpt-5.4-nano (40 casos): accuracy 85% (34/40), JSON válido 100%,
+  primer intento 100%; billing 90, technical 80, account 90, other 80; frontier 63.6% (7/11),
+  el resto de los tags ~100%; 3 de los 6 fallos eligieron la alternativa aceptable; calibración
+  NULA (conf media 0.736 al acertar vs 0.728 al fallar); technical-03 (IVA de facturas que emite
+  el cliente) → billing con conf 0.9 (error confiado); costo $0.0124 total, 530 in / 163 out
+  promedio, latencia 2.0s.** Archivo: `evals/results/20261107-162530_v1_zero_shot_openai_gpt-5.4-nano.json`.
 - Contenidos de cursada a tener en cuenta: tokenización/context window, sampling (temperatura, top-p),
   APIs de distintos proveedores, streaming, rate limits/errores, costo por token; system prompts y roles,
   few-shot, chain-of-thought, plantillas/versionado de prompts, variables de contexto.

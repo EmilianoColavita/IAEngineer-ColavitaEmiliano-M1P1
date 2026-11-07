@@ -220,11 +220,14 @@ PROVIDERS: dict[str, type[LLMProvider]] = {
 }
 
 
-def get_provider(name: str | None = None) -> LLMProvider:
-    """Devuelve el proveedor pedido o, si no se indica, el de LLM_PROVIDER en el .env."""
+def get_provider(name: str | None = None, model: str | None = None) -> LLMProvider:
+    """Devuelve el proveedor pedido o, si no se indica, el de LLM_PROVIDER en el .env.
+
+    `model` pisa el modelo del .env (sirve para comparar modelos en los evals).
+    """
     name = (name or os.getenv("LLM_PROVIDER", "openai")).strip().lower()
     if name not in PROVIDERS:
         raise ProviderError(
             f"Proveedor desconocido '{name}'. Disponibles: {', '.join(PROVIDERS)}"
         )
-    return PROVIDERS[name]()
+    return PROVIDERS[name](model=model)
