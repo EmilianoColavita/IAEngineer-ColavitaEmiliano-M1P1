@@ -141,8 +141,7 @@ Flujo: `consulta → guardrail entrada → prompt YAML → LLMProvider → parse
   `attempts` y `last_raw`, avisos por stderr. `call_llm(messages)` ahora recibe la conversación.
   `scripts/check_retry.py` lo prueba con un LLM falso (`python -m scripts.check_retry`).
   Verificado con la API real que el historial con `assistant` funciona y el modelo corrige.
-- **Fase actual: 4 (Métricas).** Implementada y verificada; falta que Emiliano la revise y
-  commitee. `src/metrics.py`: `PRICES` (USD/1M, verificados 2026-11-07: gpt-5.4-nano 0.20/1.25,
+- Fase 4 (Métricas): **completada**. `src/metrics.py`: `PRICES` (USD/1M, verificados 2026-11-07: gpt-5.4-nano 0.20/1.25,
   gpt-5.4-mini 0.75/4.50, gemini-3.1-flash-lite 0.25/1.50), `compute_cost` (modelo sin precio →
   null), `log_request` (append, crea `data/`, no rompe el triage si falla la escritura),
   `METRICS_PATH` parcheable. `triage.py`: `call_llm` devuelve `LLMResult` (texto + tokens),
@@ -153,6 +152,18 @@ Flujo: `consulta → guardrail entrada → prompt YAML → LLMProvider → parse
   (`scripts/fake_llm.py`) escriben en archivo temporal: `check_retry`, `check_metrics` (13 OK).
   Dato real: mismo ticket v1 = 515 in / 165 out ($0.000309); v2 = 1081 in / 115 out ($0.000360):
   v2 duplica el input pero responde más corto → solo +16% de costo.
+- **Fase actual: 5 (Segundo proveedor + abstracción + backoff).** Implementada y verificada;
+  falta que Emiliano la revise y commitee. `src/providers.py`: `LLMProvider` (ABC,
+  `generate(messages, *, temperature, max_output_tokens) -> LLMResult`), `LLMResult` movido acá,
+  `OpenAIProvider` (max_retries=0, timeout 30s) y `GeminiProvider` (HttpRetryOptions attempts=1;
+  system → `system_instruction`, assistant → `model`, output = candidates + thoughts),
+  errores propios `ProviderError` / `RetryableError(retry_after)`, `get_provider()` con
+  `LLM_PROVIDER`. 429 `insufficient_quota` → no reintentable. `triage.py` ya no importa SDKs:
+  `triage(query, prompt_name, provider=None)`, `_call_with_backoff` (3 reintentos, 1s·2^n,
+  tope 20s, jitter, respeta Retry-After, `_sleep` parcheable), métrica `api_retries`.
+  `main.py`: `--provider`. Checks: `FakeProvider` implementa el contrato; `check_backoff` (19 OK,
+  incluye excepciones reales de ambos SDKs). Verificado real: ambos proveedores, cambio por
+  `LLM_PROVIDER` sin flag, y retry multi-turn con Gemini.
 - Contenidos de cursada a tener en cuenta: tokenización/context window, sampling (temperatura, top-p),
   APIs de distintos proveedores, streaming, rate limits/errores, costo por token; system prompts y roles,
   few-shot, chain-of-thought, plantillas/versionado de prompts, variables de contexto.
@@ -165,6 +176,8 @@ Flujo: `consulta → guardrail entrada → prompt YAML → LLMProvider → parse
 | ídem | v1 | `answer` largo y con voseo | El prompt pedía "breve" y "español neutro": las instrucciones no se cumplen al 100% → justificación de evals |
 | "no me deja agregar un usuario nuevo y encima me llego una factura que no entiendo" | v2 | account, **0.55**, actions para ambos temas | Multi-intención calibrada como enseña el ejemplo few-shot → caso para el **dataset (fase 6)** |
 | "hola, quería saber si el plan anual tiene descuento" | v2 | other, 0.7 | El `answer` afirma que el plan anual "suele tener descuentos": **inventa condiciones comerciales** → guardrail de salida (fase 9) |
+| "no puedo exportar el reporte de ventas a excel, me da error" | v1 | openai: technical 0.86 / gemini: technical 0.95 | Gemini dice **"He derivado tu caso... nos pondremos en contacto a la brevedad"**: afirma acciones que no hizo y promete plazos → guardrail de salida (fase 9). Ambos coinciden en categoría |
+| retry real con confidence 1.3 + "Billing" | v1 | gemini corrigió a billing con **confidence 1.0** | Gemini tiende a confidence más alta que OpenAI → calibración distinta por proveedor: medirlo en la comparativa de modelos |
 | `--prompt v3` | — | argparse lo rechaza listando los disponibles | Manejo de errores de la CLI |
 | `"   "` | — | "consulta vacía", exit 1 | Validación de entrada en `main.py` |
 

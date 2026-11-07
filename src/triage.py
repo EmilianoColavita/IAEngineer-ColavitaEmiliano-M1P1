@@ -1,33 +1,43 @@
 """Lógica de triage: prompt → LLM → validación (con retry) → métricas.
 
 Es la función que reutilizan tanto la CLI (main.py) como, más adelante, el runner de evals.
-Fase 4: un solo proveedor (OpenAI), con retry y una línea de métricas por request.
+No conoce a ningún proveedor concreto: habla con `LLMProvider` (ver providers.py).
+
+Dos capas de reintento, una adentro de la otra:
+  - retry de validación: el modelo respondió algo inválido → feedback → nueva llamada.
+  - backoff de API: la llamada falló (rate limit, 5xx, red) → esperar → misma llamada.
 """
 
-import os
+import random
 import re
 import sys
 import time
 from dataclasses import dataclass
 
-from openai import OpenAI
 from pydantic import ValidationError
 
 from src import metrics
 from src.prompts import load_prompt
+from src.providers import LLMProvider, LLMResult, RetryableError, get_provider
 from src.schema import TriageResponse
 
 DEFAULT_PROMPT = "v1_zero_shot"
-PROVIDER = "openai"  # fase 5: pasa a ser configurable con LLM_PROVIDER
 
 # Parámetros de sampling: viven en el código, NO en el YAML, para que al comparar
-# prompts la única variable sea el texto del prompt.
+# prompts la única variable sea el texto del prompt. Se pasan a cualquier proveedor.
 TEMPERATURE = 0  # clasificación: queremos la misma salida ante la misma entrada
 MAX_OUTPUT_TOKENS = 500  # el JSON esperado ocupa ~150 tokens; esto corta respuestas desbocadas
 
-# Reintentos ante respuesta inválida (no ante errores de API: eso es backoff, fase 5).
-# 2 reintentos = hasta 3 llamadas. Cada reintento reenvía todo el historial: es caro.
+# Retry de validación: 2 reintentos = hasta 3 llamadas. Cada uno reenvía todo el historial.
 MAX_RETRIES = 2
+
+# Backoff de API: hasta 3 reintentos por llamada, espera 1s, 2s, 4s... (tope 20s) + jitter.
+MAX_API_RETRIES = 3
+BACKOFF_BASE_S = 1.0
+BACKOFF_MAX_S = 20.0
+
+# Se usa a través de esta variable para que los checks puedan simular la espera.
+_sleep = time.sleep
 
 # Mensaje de feedback al modelo. Vive en código (no en el YAML) porque es igual para
 # todas las versiones de prompt: así no altera la comparación entre v1 y v2.
@@ -50,20 +60,11 @@ class TriageError(Exception):
 
 
 @dataclass
-class LLMResult:
-    """Lo que devuelve una llamada al LLM: el texto y cuántos tokens consumió."""
-
-    text: str
-    input_tokens: int
-    output_tokens: int
-    cached_input_tokens: int = 0
-
-
-@dataclass
 class RequestStats:
-    """Acumulado de un request completo (todos los intentos del retry)."""
+    """Acumulado de un request completo (todos los intentos)."""
 
-    attempts: int = 0
+    attempts: int = 0  # llamadas que devolvieron respuesta (retry de validación)
+    api_retries: int = 0  # reintentos por errores de API (backoff)
     input_tokens: int = 0
     output_tokens: int = 0
     cached_input_tokens: int = 0
@@ -73,34 +74,6 @@ class RequestStats:
         self.input_tokens += result.input_tokens
         self.output_tokens += result.output_tokens
         self.cached_input_tokens += result.cached_input_tokens
-
-
-def get_model() -> str:
-    return os.getenv("OPENAI_MODEL", "gpt-5.4-nano")
-
-
-def call_llm(messages: list[dict]) -> LLMResult:
-    """Llama a OpenAI con la conversación y devuelve el texto crudo y el uso de tokens.
-
-    Toda la dependencia con el proveedor queda aislada acá: en la fase 5 esto pasa a
-    ser una implementación de LLMProvider.
-    """
-    client = OpenAI()  # toma OPENAI_API_KEY del entorno
-
-    response = client.responses.create(
-        model=get_model(),
-        input=messages,
-        temperature=TEMPERATURE,
-        max_output_tokens=MAX_OUTPUT_TOKENS,
-    )
-    usage = response.usage
-    details = usage.input_tokens_details
-    return LLMResult(
-        text=response.output_text,
-        input_tokens=usage.input_tokens,
-        output_tokens=usage.output_tokens,  # incluye tokens de razonamiento, si los hubo
-        cached_input_tokens=(details.cached_tokens or 0) if details else 0,
-    )
 
 
 def clean_raw(raw: str) -> str:
@@ -123,12 +96,50 @@ def format_errors(error: ValidationError) -> str:
     return "\n".join(lines)
 
 
-def _run_with_retry(messages: list[dict], stats: RequestStats) -> TriageResponse:
+def backoff_delay(retry_number: int, retry_after: float | None = None) -> float:
+    """Segundos a esperar antes del reintento N (0, 1, 2...).
+
+    Si la API dijo cuánto esperar (Retry-After), se respeta. Si no: exponencial
+    (1s, 2s, 4s...) con tope, más jitter para que muchos clientes no reintenten juntos.
+    """
+    if retry_after is not None:
+        return min(retry_after, BACKOFF_MAX_S)
+    delay = min(BACKOFF_BASE_S * 2**retry_number, BACKOFF_MAX_S)
+    return delay + random.uniform(0, delay / 2)
+
+
+def _call_with_backoff(
+    provider: LLMProvider, messages: list[dict], stats: RequestStats
+) -> LLMResult:
+    """Llama al proveedor; ante errores transitorios espera y reintenta.
+
+    ProviderError (no reintentable) se propaga de inmediato: esperar no lo arregla.
+    """
+    for retry_number in range(MAX_API_RETRIES + 1):
+        try:
+            return provider.generate(
+                messages, temperature=TEMPERATURE, max_output_tokens=MAX_OUTPUT_TOKENS
+            )
+        except RetryableError as e:
+            if retry_number == MAX_API_RETRIES:
+                raise
+            delay = backoff_delay(retry_number, e.retry_after)
+            stats.api_retries += 1
+            print(
+                f"[backoff] {e} → reintento {retry_number + 1}/{MAX_API_RETRIES} en {delay:.1f}s",
+                file=sys.stderr,
+            )
+            _sleep(delay)
+
+
+def _run_with_retry(
+    provider: LLMProvider, messages: list[dict], stats: RequestStats
+) -> TriageResponse:
     """Llama al LLM y valida; ante respuesta inválida reintenta con feedback."""
     total_attempts = MAX_RETRIES + 1
 
     for attempt in range(1, total_attempts + 1):
-        result = call_llm(messages)
+        result = _call_with_backoff(provider, messages, stats)
         stats.add(result)  # se cuenta ANTES de validar: un intento fallido también se paga
         raw = result.text
         try:
@@ -150,27 +161,31 @@ def _run_with_retry(messages: list[dict], stats: RequestStats) -> TriageResponse
     )
 
 
-def triage(query: str, prompt_name: str = DEFAULT_PROMPT) -> TriageResponse:
+def triage(
+    query: str,
+    prompt_name: str = DEFAULT_PROMPT,
+    provider: LLMProvider | None = None,
+) -> TriageResponse:
     """Clasifica una consulta y devuelve la respuesta validada.
 
-    Si la respuesta no cumple el contrato, le devuelve el error al modelo y reintenta
-    hasta MAX_RETRIES veces. Cada request (exitoso o no) deja una línea en metrics.jsonl.
-    Lanza PromptError si el prompt no existe, TriageError si se agotan los intentos y
-    errores de openai si falla la API.
+    `provider`: si no se pasa, se usa el de LLM_PROVIDER en el .env.
+    Cada request (exitoso o no) deja una línea en metrics.jsonl.
+    Lanza PromptError si el prompt no existe, TriageError si se agotan los intentos de
+    validación y ProviderError si falla el proveedor (incluido RetryableError agotado).
     """
     prompt = load_prompt(prompt_name)
+    provider = provider or get_provider()
     messages = [
         {"role": "system", "content": prompt.system},
         {"role": "user", "content": prompt.render_user(query)},
     ]
-    model = get_model()
     stats = RequestStats()
     result: TriageResponse | None = None
     error: str | None = None
     start = time.perf_counter()
 
     try:
-        result = _run_with_retry(messages, stats)
+        result = _run_with_retry(provider, messages, stats)
         return result
     except Exception as e:
         error = type(e).__name__
@@ -179,10 +194,11 @@ def triage(query: str, prompt_name: str = DEFAULT_PROMPT) -> TriageResponse:
         # finally: se registra SIEMPRE, salga bien o mal. Los fallos también cuestan.
         metrics.log_request(
             {
-                "provider": PROVIDER,
-                "model": model,
+                "provider": provider.name,
+                "model": provider.model,
                 "prompt": prompt_name,
                 "attempts": stats.attempts,
+                "api_retries": stats.api_retries,
                 "success": result is not None,
                 "error": error,
                 "category": result.category if result else None,
@@ -190,7 +206,8 @@ def triage(query: str, prompt_name: str = DEFAULT_PROMPT) -> TriageResponse:
                 "cached_input_tokens": stats.cached_input_tokens,
                 "output_tokens": stats.output_tokens,
                 "total_tokens": stats.input_tokens + stats.output_tokens,
+                # incluye las esperas del backoff: es la latencia que vive el usuario
                 "latency_s": round(time.perf_counter() - start, 3),
-                **metrics.compute_cost(model, stats.input_tokens, stats.output_tokens),
+                **metrics.compute_cost(provider.model, stats.input_tokens, stats.output_tokens),
             }
         )

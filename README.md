@@ -98,7 +98,8 @@ cada uno dio el resultado esperado.
 ```powershell
 python -m src.main "me cobraron dos veces la suscripción"                 # prompt por defecto (v1_zero_shot)
 python -m src.main "me cobraron dos veces la suscripción" --prompt v2_few_shot
-python -m src.main --help                                                 # ver opciones y prompts disponibles
+python -m src.main "me cobraron dos veces la suscripción" --provider gemini  # pisa LLM_PROVIDER del .env
+python -m src.main --help                                                 # ver opciones, prompts y proveedores
 ```
 
 Imprime el JSON validado por stdout. Si el modelo devuelve una respuesta inválida, se
@@ -125,6 +126,45 @@ Comprueba con un LLM simulado que cada request deje una línea, que se sumen los
 todos los intentos, que los fallos también se registren y que el costo se recalcule a mano.
 Escribe en un archivo temporal: no toca `data/metrics.jsonl`.
 
+**6. Verificar el backoff y el manejo de errores de los proveedores (sin llamar a la API)**
+
+```powershell
+python -m scripts.check_backoff
+```
+
+Comprueba que los errores transitorios se reintenten con esperas crecientes, que los no
+reintentables fallen de inmediato, y que cada adaptador traduzca correctamente las
+excepciones reales de su SDK (429, `insufficient_quota`, 401, 404, 5xx, timeout, red).
+
+## Proveedores
+
+El sistema funciona con **OpenAI** y **Google Gemini** detrás de una abstracción común
+(`LLMProvider` en `src/providers.py`). La lógica de negocio (`triage.py`) no conoce a ningún
+proveedor concreto: para cambiar de proveedor alcanza con cambiar `LLM_PROVIDER` en el `.env`
+(o usar `--provider`).
+
+Cada adaptador traduce desde y hacia su API:
+
+| | OpenAI | Gemini |
+|---|---|---|
+| System prompt | mensaje con `role: "system"` | parámetro `system_instruction` |
+| Rol de la respuesta del modelo | `assistant` | `model` |
+| Tokens de salida | `output_tokens` | `candidates_token_count` + `thoughts_token_count` |
+| Errores | `openai.*Error` | `google.genai.errors.*Error` |
+
+Los errores de cada SDK se traducen a dos tipos propios:
+
+| Error | Tipo | Comportamiento |
+|---|---|---|
+| 429 rate limit, 5xx, timeout, error de red | `RetryableError` | Backoff y reintento |
+| 429 `insufficient_quota`, 400, 401, 403, 404 | `ProviderError` | Falla de inmediato: esperar no lo arregla |
+
+**Backoff exponencial con jitter**: hasta 3 reintentos por llamada, esperando 1s, 2s, 4s (tope
+20s) más un componente aleatorio para que muchos clientes no reintenten a la vez. Si la API
+envía `Retry-After`, se respeta. Los reintentos internos de los SDKs están **desactivados**
+(el de OpenAI reintenta 2 veces en silencio por defecto) para que haya un único mecanismo,
+visible en stderr y registrado en las métricas (`api_retries`).
+
 ## Métricas
 
 Cada request agrega **una línea** a `data/metrics.jsonl` (append-only, una línea JSON por
@@ -132,7 +172,7 @@ request, exitoso o no):
 
 ```json
 {"timestamp": "2026-11-07T15:16:16+00:00", "provider": "openai", "model": "gpt-5.4-nano",
- "prompt": "v1_zero_shot", "attempts": 1, "success": true, "error": null, "category": "account",
+ "prompt": "v1_zero_shot", "attempts": 1, "api_retries": 0, "success": true, "error": null, "category": "account",
  "input_tokens": 515, "cached_input_tokens": 0, "output_tokens": 165, "total_tokens": 680,
  "latency_s": 4.239, "price_input_per_1m": 0.2, "price_output_per_1m": 1.25, "cost_usd": 0.00030925}
 ```
@@ -148,6 +188,8 @@ cost_usd = input_tokens / 1.000.000 × price_input_per_1m + output_tokens / 1.00
 - **Los precios usados se guardan en cada línea**: si el proveedor cambia la tarifa, las
   líneas viejas se siguen pudiendo auditar con el precio vigente cuando se generaron.
 - **Retry**: tokens, costo y latencia son la **suma de todos los intentos** del request.
+  `attempts` cuenta los intentos de validación y `api_retries` los reintentos por errores de
+  API. La latencia incluye las esperas del backoff (es la que vive el usuario).
 - **Fallos**: un request que agotó los reintentos también se registra (`success: false`),
   porque se pagó igual.
 - **Tokens cacheados**: se registran en `cached_input_tokens` pero se cobran a precio de input
@@ -171,6 +213,7 @@ cost_usd = input_tokens / 1.000.000 × price_input_per_1m + output_tokens / 1.00
 │   ├── main.py            # CLI: lee argumentos, llama a triage e imprime
 │   ├── triage.py          # orquesta: prompt → LLM → validación (retry) → métricas
 │   ├── prompts.py         # carga y valida los prompts YAML
+│   ├── providers.py       # LLMProvider + adaptadores OpenAI / Gemini + errores propios
 │   ├── metrics.py         # costo por request + escritura en data/metrics.jsonl
 │   └── schema.py          # contrato Pydantic de la respuesta + casos de prueba
 ├── data/
@@ -180,9 +223,10 @@ cost_usd = input_tokens / 1.000.000 × price_input_per_1m + output_tokens / 1.00
 │   └── v2_few_shot.yaml   # prompt versionado: few-shot (mismas instrucciones + 6 ejemplos)
 ├── scripts/
 │   ├── hello_llm.py       # prueba de conexión con OpenAI y Gemini
-│   ├── fake_llm.py        # LLM simulado compartido por los checks
-│   ├── check_retry.py     # prueba del retry con un LLM simulado
-│   └── check_metrics.py   # prueba de las métricas con un LLM simulado
+│   ├── fake_llm.py        # proveedor simulado (FakeProvider) compartido por los checks
+│   ├── check_retry.py     # prueba del retry
+│   ├── check_metrics.py   # prueba de las métricas
+│   └── check_backoff.py   # prueba del backoff y la traducción de errores de los SDKs
 ├── docs/                  # enunciado y uso de IA en el desarrollo
 ├── .env.example           # plantilla de variables de entorno
 └── requirements.txt       # dependencias con versiones fijadas
@@ -215,7 +259,7 @@ cost_usd = input_tokens / 1.000.000 × price_input_per_1m + output_tokens / 1.00
 - [x] Flujo mínimo: CLI + prompt YAML + un proveedor (OpenAI)
 - [x] Retry ante JSON inválido
 - [x] Métricas por request (`data/metrics.jsonl`)
-- [ ] Abstracción `LLMProvider` con dos proveedores
+- [x] Abstracción `LLMProvider` con dos proveedores + backoff
 - [ ] Dataset y runner de evals
 - [ ] Comparación de prompts (zero-shot vs few-shot)
 - [ ] Guardrails de entrada y salida

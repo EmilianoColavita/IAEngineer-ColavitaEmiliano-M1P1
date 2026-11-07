@@ -3,6 +3,7 @@
 Uso:
     python -m src.main "me cobraron dos veces"
     python -m src.main "me cobraron dos veces" --prompt v2_few_shot
+    python -m src.main "me cobraron dos veces" --provider gemini
 
 Responsabilidad única: leer argumentos, llamar a triage() e imprimir el resultado.
 """
@@ -10,10 +11,10 @@ Responsabilidad única: leer argumentos, llamar a triage() e imprimir el resulta
 import argparse
 import sys
 
-import openai
 from dotenv import load_dotenv
 
 from src.prompts import PromptError, available_prompts
+from src.providers import PROVIDERS, ProviderError, RetryableError, get_provider
 from src.triage import DEFAULT_PROMPT, TriageError, triage
 
 
@@ -28,6 +29,11 @@ def parse_args() -> argparse.Namespace:
         choices=available_prompts(),
         help=f"Versión del prompt a usar (por defecto: {DEFAULT_PROMPT}).",
     )
+    parser.add_argument(
+        "--provider",
+        choices=list(PROVIDERS),
+        help="Proveedor de LLM. Si no se indica, se usa LLM_PROVIDER del .env.",
+    )
     return parser.parse_args()
 
 
@@ -41,7 +47,8 @@ def main() -> int:
         return 1
 
     try:
-        result = triage(query, args.prompt)
+        provider = get_provider(args.provider)
+        result = triage(query, args.prompt, provider)
     except PromptError as e:
         print(f"ERROR de prompt: {e}", file=sys.stderr)
         return 1
@@ -49,9 +56,13 @@ def main() -> int:
         # Se agotaron los reintentos: el modelo nunca cumplió el contrato.
         print(f"ERROR: {e}\nÚltima respuesta del modelo:\n{e.last_raw}", file=sys.stderr)
         return 1
-    except openai.APIError as e:
-        # 401 key inválida, 404 modelo inexistente, 429 cuota/rate limit, errores de red...
-        print(f"ERROR de la API ({type(e).__name__}): {e}", file=sys.stderr)
+    except RetryableError as e:
+        # Error transitorio que no se resolvió ni con backoff.
+        print(f"ERROR del proveedor (persistió tras los reintentos): {e}", file=sys.stderr)
+        return 1
+    except ProviderError as e:
+        # Key inválida, sin saldo, modelo inexistente...: reintentar no lo arregla.
+        print(f"ERROR del proveedor: {e}", file=sys.stderr)
         return 1
 
     print(result.model_dump_json(indent=2))

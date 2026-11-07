@@ -1,15 +1,15 @@
-"""Herramientas compartidas por los checks: un LLM falso y métricas en archivo temporal.
+"""Herramientas compartidas por los checks: un proveedor falso y métricas en archivo temporal.
 
-No llama a ninguna API: sirve para probar la lógica propia (retry, métricas) gratis y
-con resultados siempre iguales. No prueba al modelo real.
+`FakeProvider` implementa el mismo contrato `LLMProvider` que OpenAI y Gemini: triage()
+no nota la diferencia. Sirve para probar la lógica propia (retry, backoff, métricas)
+gratis y con resultados siempre iguales. No prueba al modelo real.
 """
 
 import tempfile
 from pathlib import Path
 
 from src import metrics
-from src import triage as triage_module
-from src.triage import LLMResult
+from src.providers import LLMProvider, LLMResult
 
 VALIDO = (
     '{"answer": "Revisamos tu cobro duplicado", "confidence": 0.9, '
@@ -20,25 +20,34 @@ JSON_ROTO = VALIDO[:-1]  # sin la llave de cierre
 CON_FENCE = f"```json\n{VALIDO}\n```"
 
 
-def install_fake_llm(respuestas: list[str], input_tokens=100, output_tokens=50):
-    """Reemplaza call_llm por uno falso que responde en orden.
+class FakeProvider(LLMProvider):
+    """Proveedor falso: devuelve las respuestas preprogramadas en orden.
 
-    Devuelve la lista donde se registra la conversación recibida en cada llamada.
+    Cada elemento de `respuestas` es un str (texto que "responde el modelo") o una
+    excepción (que se lanza, para simular errores de API).
     Cada llamada "consume" input_tokens + 10 por cada mensaje extra del historial,
     para imitar que los reintentos reenvían la conversación (y cuestan más).
     """
-    llamadas = []
 
-    def call_llm(messages: list[dict]) -> LLMResult:
-        llamadas.append([dict(m) for m in messages])
+    name = "fake"
+
+    def __init__(self, respuestas, model="gpt-5.4-nano", input_tokens=100, output_tokens=50):
+        self.model = model  # por defecto un modelo con precio conocido
+        self.respuestas = list(respuestas)
+        self.input_tokens = input_tokens
+        self.output_tokens = output_tokens
+        self.llamadas: list[list[dict]] = []  # conversación recibida en cada llamada
+
+    def generate(self, messages, *, temperature, max_output_tokens) -> LLMResult:
+        self.llamadas.append([dict(m) for m in messages])
+        respuesta = self.respuestas[len(self.llamadas) - 1]
+        if isinstance(respuesta, Exception):
+            raise respuesta
         return LLMResult(
-            text=respuestas[len(llamadas) - 1],
-            input_tokens=input_tokens + 10 * (len(messages) - 2),
-            output_tokens=output_tokens,
+            text=respuesta,
+            input_tokens=self.input_tokens + 10 * (len(messages) - 2),
+            output_tokens=self.output_tokens,
         )
-
-    triage_module.call_llm = call_llm
-    return llamadas
 
 
 def use_temp_metrics() -> Path:

@@ -1,7 +1,7 @@
 """Verifica el retry de triage() sin llamar a la API.
 
-Reemplaza `call_llm` por un LLM falso que devuelve respuestas preprogramadas (rotas o
-válidas) y comprueba cuántas llamadas se hicieron y qué feedback recibió el modelo.
+Usa un proveedor falso que devuelve respuestas preprogramadas (rotas o válidas) y
+comprueba cuántas llamadas se hicieron y qué feedback recibió el modelo.
 
 Uso (desde la raíz del repo):
     python -m scripts.check_retry
@@ -12,21 +12,22 @@ from scripts.fake_llm import (
     CONFIDENCE_INVALIDA,
     JSON_ROTO,
     VALIDO,
-    install_fake_llm,
+    FakeProvider,
     use_temp_metrics,
 )
 from src.triage import MAX_RETRIES, TriageError, triage
 
 
 def correr(descripcion, respuestas, llamadas_esperadas, deberia_fallar=False):
-    llamadas = install_fake_llm(respuestas)
+    provider = FakeProvider(respuestas)
 
     try:
-        triage("me cobraron dos veces")
+        triage("me cobraron dos veces", provider=provider)
         fallo = False
     except TriageError:
         fallo = True
 
+    llamadas = provider.llamadas
     ok = len(llamadas) == llamadas_esperadas and fallo == deberia_fallar
     print(f"{'OK   ' if ok else 'FALLA'} {descripcion} (llamadas: {len(llamadas)})")
     return ok, llamadas
