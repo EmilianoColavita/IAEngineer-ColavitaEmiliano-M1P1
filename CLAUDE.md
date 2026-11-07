@@ -127,7 +127,9 @@ Flujo: `consulta → guardrail entrada → prompt YAML → LLMProvider → parse
   `gemini-3.1-flash-lite`; `prompts/v1_zero_shot.yaml` (campos: id, version, technique,
   description, system, user_template con `{query}`; solo user_template se formatea);
   README inicial. Modelo en `.env`, temperatura/límites en código, NO en el YAML.
-  Pendiente: Emiliano escribe v2 few-shot; después `prompts.py`, `triage.py`, `main.py`.
+  `prompts/v2_few_shot.yaml` = system de v1 idéntico + 6 ejemplos de frontera/calibración
+  dentro del system (no usa tickets del enunciado, para no contaminar evals).
+  Pendiente: `prompts.py`, `triage.py`, `main.py`.
 - Contenidos de cursada a tener en cuenta: tokenización/context window, sampling (temperatura, top-p),
   APIs de distintos proveedores, streaming, rate limits/errores, costo por token; system prompts y roles,
   few-shot, chain-of-thought, plantillas/versionado de prompts, variables de contexto.

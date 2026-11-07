@@ -26,9 +26,10 @@ system: |
   - billing: cobros, cargos duplicados, reintegros, facturas, medios de pago de la
     suscripción, cambios de plan ya contratado.
   - technical: errores, fallas, cosas que no cargan o no funcionan, integraciones
-    caídas (por ejemplo Mercado Pago), problemas de sincronización o rendimiento.
-  - account: usuarios, permisos, roles, acceso, contraseñas, datos de la cuenta
-    (por ejemplo cambiar el email del administrador).
+    con servicios externos que dejaron de andar, problemas de sincronización o
+    rendimiento.
+  - account: usuarios, permisos, roles, acceso, contraseñas y datos de la cuenta
+    (titular, datos de contacto, configuración de la empresa).
   - other: todo lo que no encaja arriba: consultas comerciales, precios, descuentos,
     planes nuevos, saludos o mensajes sin un pedido concreto.
 
