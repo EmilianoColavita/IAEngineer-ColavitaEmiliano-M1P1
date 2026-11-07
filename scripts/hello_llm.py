@@ -16,6 +16,9 @@ load_dotenv()
 
 PROMPT = "Respondé en una sola oración: ¿qué es un SaaS?"
 
+# Temperatura 0: misma entrada → (casi) misma salida. Clave para clasificar y para evals reproducibles.
+TEMPERATURE = 0
+
 
 def hello_openai():
     from openai import OpenAI
@@ -24,7 +27,7 @@ def hello_openai():
     client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
     start = time.perf_counter()
-    response = client.responses.create(model=model, input=PROMPT)
+    response = client.responses.create(model=model, input=PROMPT, temperature=TEMPERATURE)
     latency = time.perf_counter() - start
 
     usage = response.usage
@@ -33,12 +36,17 @@ def hello_openai():
 
 def hello_gemini():
     from google import genai
+    from google.genai import types
 
     model = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
     client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
     start = time.perf_counter()
-    response = client.models.generate_content(model=model, contents=PROMPT)
+    response = client.models.generate_content(
+        model=model,
+        contents=PROMPT,
+        config=types.GenerateContentConfig(temperature=TEMPERATURE),
+    )
     latency = time.perf_counter() - start
 
     usage = response.usage_metadata

@@ -116,8 +116,18 @@ Flujo: `consulta → guardrail entrada → prompt YAML → LLMProvider → parse
 ## Estado actual
 
 - Fase 0 (Setup): **completada** (venv + `hello_llm.py` funcionando).
-- **Fase actual: 1 (Contrato Pydantic en `src/schema.py`).**
-  Al retomar, preguntame en qué punto de la fase 1 estoy y revisá lo que haya hecho.
+- Fase 1 (Contrato Pydantic): **completada y commiteada**. `src/schema.py` con `TriageResponse`
+  y 17 casos (`python -m src.schema`). Decisiones: `str_strip_whitespace`, `extra="forbid"`,
+  `category` como `Literal` y sin normalizar mayúsculas (lo corrige el retry), `confidence` en
+  modo lax (acepta `"0.85"`), `actions` admite lista vacía, máx. 5, sin strings vacíos.
+  `model_validate_json` reporta JSON roto como `ValidationError` tipo `json_invalid` (útil en fase 3).
+- **Fase actual: 2 (Flujo mínimo: 1 proveedor + 1 prompt YAML + CLI).**
+  Al retomar, preguntame en qué punto de la fase 2 estoy y revisá lo que haya hecho.
+  Hecho: proveedor inicial OpenAI; `temperature=0` verificado OK en `gpt-5.4-nano` y
+  `gemini-3.1-flash-lite`; `prompts/v1_zero_shot.yaml` (campos: id, version, technique,
+  description, system, user_template con `{query}`; solo user_template se formatea);
+  README inicial. Modelo en `.env`, temperatura/límites en código, NO en el YAML.
+  Pendiente: Emiliano escribe v2 few-shot; después `prompts.py`, `triage.py`, `main.py`.
 - Contenidos de cursada a tener en cuenta: tokenización/context window, sampling (temperatura, top-p),
   APIs de distintos proveedores, streaming, rate limits/errores, costo por token; system prompts y roles,
   few-shot, chain-of-thought, plantillas/versionado de prompts, variables de contexto.
