@@ -136,6 +136,40 @@ Comprueba que los errores transitorios se reintenten con esperas crecientes, que
 reintentables fallen de inmediato, y que cada adaptador traduzca correctamente las
 excepciones reales de su SDK (429, `insufficient_quota`, 401, 404, 5xx, timeout, red).
 
+**7. Validar el dataset de evaluación**
+
+```powershell
+python -m evals.dataset
+```
+
+Valida cada caso, muestra la cobertura por categoría y por tag, y avisa si hay desbalance o
+si algún caso se parece demasiado a un ejemplo usado dentro de un prompt (contaminación).
+
+## Dataset de evaluación
+
+`evals/dataset.jsonl` tiene **40 casos etiquetados**, 10 por categoría. Cada línea:
+
+```json
+{"id": "technical-03", "query": "El sistema le está generando las facturas a mis clientes con el IVA mal calculado...",
+ "expected_category": "technical", "acceptable_categories": [], "tags": ["frontier"],
+ "notes": "Habla de facturas, pero son las que el cliente emite CON Nubbix → technical."}
+```
+
+**Criterios de construcción:**
+
+- **Cobertura antes que cantidad.** Además de casos claros, incluye fronteras entre
+  categorías (11), mensajes muy cortos, largos, con errores de ortografía, informales,
+  enojados, con modismos regionales (AR, MX, CO, CL), vagos, multi-intención y fuera de tema.
+  Los tags permiten ver en qué tipo de caso acierta o falla cada prompt.
+- **Score estricto.** `expected_category` es la única respuesta que suma al score principal.
+  Solo 5 casos genuinamente ambiguos (multi-intención) tienen `acceptable_categories`: una
+  respuesta en esa lista se reporta aparte, pero no cuenta como acierto.
+- **Sin contaminación.** Ningún caso copia ni parafrasea los ejemplos del prompt few-shot
+  (si lo hiciera, v2 "ganaría" por haber visto la respuesta). `python -m evals.dataset` lo
+  verifica automáticamente. Tampoco se copiaron los tickets ilustrativos del enunciado.
+- **Etiquetado:** el borrador de los casos se generó con asistencia de IA y cada etiqueta
+  fue revisada a mano (ver `docs/ai-usage.md`).
+
 ## Proveedores
 
 El sistema funciona con **OpenAI** y **Google Gemini** detrás de una abstracción común
@@ -216,6 +250,9 @@ cost_usd = input_tokens / 1.000.000 × price_input_per_1m + output_tokens / 1.00
 │   ├── providers.py       # LLMProvider + adaptadores OpenAI / Gemini + errores propios
 │   ├── metrics.py         # costo por request + escritura en data/metrics.jsonl
 │   └── schema.py          # contrato Pydantic de la respuesta + casos de prueba
+├── evals/
+│   ├── dataset.jsonl      # 40 casos etiquetados
+│   └── dataset.py         # formato, carga validada y resumen de cobertura del dataset
 ├── data/
 │   └── metrics.jsonl      # una línea por request (se genera al usar la CLI)
 ├── prompts/
@@ -260,7 +297,8 @@ cost_usd = input_tokens / 1.000.000 × price_input_per_1m + output_tokens / 1.00
 - [x] Retry ante JSON inválido
 - [x] Métricas por request (`data/metrics.jsonl`)
 - [x] Abstracción `LLMProvider` con dos proveedores + backoff
-- [ ] Dataset y runner de evals
+- [x] Dataset de evaluación (40 casos)
+- [ ] Runner de evals
 - [ ] Comparación de prompts (zero-shot vs few-shot)
 - [ ] Guardrails de entrada y salida
 - [ ] Evals adversariales y extra credit

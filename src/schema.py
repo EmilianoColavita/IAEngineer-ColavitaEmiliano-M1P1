@@ -11,6 +11,9 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
+# Las 4 categorías del contrato. Única fuente de verdad: la usan el schema y el dataset de evals.
+Category = Literal["billing", "technical", "account", "other"]
+
 # Una acción es un string no vacío (después de recortar espacios).
 Action = Annotated[str, Field(min_length=1)]
 
@@ -23,7 +26,7 @@ class TriageResponse(BaseModel):
 
     answer: str = Field(min_length=1, description="Respuesta para el cliente.")
     confidence: float = Field(ge=0, le=1, description="Seguridad del modelo, 0 a 1.")
-    category: Literal["billing", "technical", "account", "other"]
+    category: Category
     actions: list[Action] = Field(
         max_length=5, description="Acciones sugeridas para el agente humano."
     )

@@ -152,8 +152,7 @@ Flujo: `consulta → guardrail entrada → prompt YAML → LLMProvider → parse
   (`scripts/fake_llm.py`) escriben en archivo temporal: `check_retry`, `check_metrics` (13 OK).
   Dato real: mismo ticket v1 = 515 in / 165 out ($0.000309); v2 = 1081 in / 115 out ($0.000360):
   v2 duplica el input pero responde más corto → solo +16% de costo.
-- **Fase actual: 5 (Segundo proveedor + abstracción + backoff).** Implementada y verificada;
-  falta que Emiliano la revise y commitee. `src/providers.py`: `LLMProvider` (ABC,
+- Fase 5 (Proveedores + backoff): **completada**. `src/providers.py`: `LLMProvider` (ABC,
   `generate(messages, *, temperature, max_output_tokens) -> LLMResult`), `LLMResult` movido acá,
   `OpenAIProvider` (max_retries=0, timeout 30s) y `GeminiProvider` (HttpRetryOptions attempts=1;
   system → `system_instruction`, assistant → `model`, output = candidates + thoughts),
@@ -164,6 +163,17 @@ Flujo: `consulta → guardrail entrada → prompt YAML → LLMProvider → parse
   `main.py`: `--provider`. Checks: `FakeProvider` implementa el contrato; `check_backoff` (19 OK,
   incluye excepciones reales de ambos SDKs). Verificado real: ambos proveedores, cambio por
   `LLM_PROVIDER` sin flag, y retry multi-turn con Gemini.
+- **Fase actual: 6 (Dataset).** Borrador hecho por Claude (decisión de Emiliano: opción b),
+  **falta que Emiliano revise y re-etiquete cada caso**, y commit. `evals/dataset.jsonl`: 40
+  casos, 10 por categoría, sin portugués (decisión de Emiliano). Campos: id
+  (`<categoria>-NN`), query, expected_category, acceptable_categories (solo 5 casos
+  multi-intención/ambiguos; el enunciado no lo prohíbe; el score principal es ESTRICTO y la
+  alternativa se reporta aparte), tags (vocabulario cerrado: clear, frontier, multi_intent,
+  vague, short, long, typos, informal, angry, regional, off_topic), notes (por qué esa
+  etiqueta). `evals/dataset.py`: `EvalCase` (Pydantic), `load_dataset()` (junta todos los
+  errores), chequeo de contaminación vs líneas "Consulta:" de los prompts (difflib ≥ 0.6),
+  resumen `python -m evals.dataset`. `Category` se extrajo en `src/schema.py` como única
+  fuente de verdad. Pendiente: registrar en `docs/ai-usage.md` que el dataset lo generó IA.
 - Contenidos de cursada a tener en cuenta: tokenización/context window, sampling (temperatura, top-p),
   APIs de distintos proveedores, streaming, rate limits/errores, costo por token; system prompts y roles,
   few-shot, chain-of-thought, plantillas/versionado de prompts, variables de contexto.
