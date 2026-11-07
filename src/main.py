@@ -12,10 +12,9 @@ import sys
 
 import openai
 from dotenv import load_dotenv
-from pydantic import ValidationError
 
 from src.prompts import PromptError, available_prompts
-from src.triage import DEFAULT_PROMPT, triage
+from src.triage import DEFAULT_PROMPT, TriageError, triage
 
 
 def parse_args() -> argparse.Namespace:
@@ -46,9 +45,9 @@ def main() -> int:
     except PromptError as e:
         print(f"ERROR de prompt: {e}", file=sys.stderr)
         return 1
-    except ValidationError as e:
-        # El modelo respondió, pero no cumple el contrato. En la fase 3 esto dispara un retry.
-        print(f"ERROR: la respuesta del modelo no es válida:\n{e}", file=sys.stderr)
+    except TriageError as e:
+        # Se agotaron los reintentos: el modelo nunca cumplió el contrato.
+        print(f"ERROR: {e}\nÚltima respuesta del modelo:\n{e.last_raw}", file=sys.stderr)
         return 1
     except openai.APIError as e:
         # 401 key inválida, 404 modelo inexistente, 429 cuota/rate limit, errores de red...

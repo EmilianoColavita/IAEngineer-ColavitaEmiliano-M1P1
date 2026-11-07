@@ -101,8 +101,19 @@ python -m src.main "me cobraron dos veces la suscripción" --prompt v2_few_shot
 python -m src.main --help                                                 # ver opciones y prompts disponibles
 ```
 
-Imprime el JSON validado. Si algo falla (prompt inexistente, respuesta inválida del modelo,
-error de la API) muestra el motivo y termina con código de salida distinto de 0.
+Imprime el JSON validado por stdout. Si el modelo devuelve una respuesta inválida, se
+reintenta automáticamente (los avisos salen por stderr). Si algo falla definitivamente
+(prompt inexistente, reintentos agotados, error de la API) muestra el motivo y termina con
+código de salida distinto de 0.
+
+**4. Verificar el retry (sin llamar a la API)**
+
+```powershell
+python -m scripts.check_retry
+```
+
+Simula respuestas rotas del modelo y comprueba que el retry se recupere, que le devuelva el
+error al modelo y que falle de forma controlada si se agotan los intentos.
 
 ## Estructura del proyecto
 
@@ -116,7 +127,8 @@ error de la API) muestra el motivo y termina con código de salida distinto de 0
 │   ├── v1_zero_shot.yaml  # prompt versionado: zero-shot
 │   └── v2_few_shot.yaml   # prompt versionado: few-shot (mismas instrucciones + 6 ejemplos)
 ├── scripts/
-│   └── hello_llm.py       # prueba de conexión con OpenAI y Gemini
+│   ├── hello_llm.py       # prueba de conexión con OpenAI y Gemini
+│   └── check_retry.py     # prueba del retry con un LLM simulado
 ├── docs/                  # enunciado y uso de IA en el desarrollo
 ├── .env.example           # plantilla de variables de entorno
 └── requirements.txt       # dependencias con versiones fijadas
@@ -132,13 +144,22 @@ error de la API) muestra el motivo y termina con código de salida distinto de 0
 - **Contrato estricto con Pydantic**: se rechazan campos extra y categorías fuera de la
   lista (sin normalizar mayúsculas); `actions` admite lista vacía para no forzar al modelo
   a inventar acciones de relleno.
+- **Sin Structured Outputs de la API (por ahora)**: el formato se pide en el prompt y se
+  valida con Pydantic, para que el "% de JSON válido" de los evals mida la calidad de cada
+  prompt y el retry tenga sentido.
+- **Retry con feedback**: ante una respuesta inválida se le devuelve al modelo su respuesta y
+  los errores de validación (campo y motivo) para que la corrija. Máximo 2 reintentos (3
+  llamadas): cada reintento reenvía el historial completo y es más caro que el primero. Los
+  errores de API (429, 500) no se reintentan con feedback: el modelo no se equivocó.
+- **Limpieza determinística antes del retry**: si la respuesta viene envuelta en un bloque
+  ` ```json `, se limpia en código. Lo que se arregla con certeza en código no gasta una llamada.
 
 ## Estado del proyecto
 
 - [x] Setup y prueba de conexión con ambos proveedores
 - [x] Contrato de salida con Pydantic
 - [x] Flujo mínimo: CLI + prompt YAML + un proveedor (OpenAI)
-- [ ] Retry ante JSON inválido
+- [x] Retry ante JSON inválido
 - [ ] Métricas por request (`data/metrics.jsonl`)
 - [ ] Abstracción `LLMProvider` con dos proveedores
 - [ ] Dataset y runner de evals

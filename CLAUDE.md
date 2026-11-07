@@ -13,6 +13,9 @@ Reglas de trabajo (importantes):
 - Boilerplate trivial (por ejemplo, contenido de `.gitignore`) podés sugerirlo si te lo pido.
 - Respondé en español rioplatense.
 - Avanzamos **paso a paso, una fase a la vez**. No adelantes fases futuras salvo que te pregunte.
+- **Al empezar cada fase**, antes de escribir código: explicame de qué trata la fase y presentame
+  el plan de desarrollo (qué archivos, qué decisiones, cómo se prueba). Esperá mi OK para codear.
+  Al terminarla, resumí qué se hizo en cada archivo y cómo se verificó.
 - Si consultás algo de una API/SDK que pudo haber cambiado (nombres de modelos, precios,
   firmas del SDK), verificalo en la documentación oficial en vez de asumirlo.
 
@@ -121,9 +124,7 @@ Flujo: `consulta → guardrail entrada → prompt YAML → LLMProvider → parse
   `category` como `Literal` y sin normalizar mayúsculas (lo corrige el retry), `confidence` en
   modo lax (acepta `"0.85"`), `actions` admite lista vacía, máx. 5, sin strings vacíos.
   `model_validate_json` reporta JSON roto como `ValidationError` tipo `json_invalid` (útil en fase 3).
-- **Fase actual: 2 (Flujo mínimo: 1 proveedor + 1 prompt YAML + CLI).**
-  Al retomar, preguntame en qué punto de la fase 2 estoy y revisá lo que haya hecho.
-  Hecho: proveedor inicial OpenAI; `temperature=0` verificado OK en `gpt-5.4-nano` y
+- Fase 2 (Flujo mínimo): **completada**. Detalle: proveedor inicial OpenAI; `temperature=0` verificado OK en `gpt-5.4-nano` y
   `gemini-3.1-flash-lite`; `prompts/v1_zero_shot.yaml` (campos: id, version, technique,
   description, system, user_template con `{query}`; solo user_template se formatea);
   README inicial. Modelo en `.env`, temperatura/límites en código, NO en el YAML.
@@ -133,10 +134,28 @@ Flujo: `consulta → guardrail entrada → prompt YAML → LLMProvider → parse
   `triage.py` (call_llm aislada con Responses API, temperature=0, max_output_tokens=500;
   sin Structured Outputs a propósito para que retry y "% JSON válido" midan algo) y
   `main.py` (argparse, `--prompt` con choices) funcionando de punta a punta.
-  Pendiente para cerrar: que Emiliano lo revise, commit. Observado: el answer de v1 pidió
-  "últimos 4 dígitos de la tarjeta" (dato sensible → guardrail de salida en fase 9) y es largo.
+- **Fase actual: 3 (Retry ante parseo/validación inválida).** Implementada y probada; falta que
+  Emiliano la revise y commitee. En `triage.py`: `MAX_RETRIES=2` (hasta 3 llamadas), retry solo
+  ante `ValidationError` (errores de API → backoff en fase 5), feedback = respuesta cruda como
+  `assistant` + `RETRY_MESSAGE` con errores `campo: msg` (en código, no en YAML, igual para todas
+  las versiones), `clean_raw()` saca ```json en código sin gastar retry, `TriageError` con
+  `attempts` y `last_raw`, avisos por stderr. `call_llm(messages)` ahora recibe la conversación.
+  `scripts/check_retry.py` lo prueba con un LLM falso (`python -m scripts.check_retry`).
+  Verificado con la API real que el historial con `assistant` funciona y el modelo corrige.
+  Ojo fase 4: las métricas tienen que sumar tokens/costo de TODOS los intentos de un request.
 - Contenidos de cursada a tener en cuenta: tokenización/context window, sampling (temperatura, top-p),
   APIs de distintos proveedores, streaming, rate limits/errores, costo por token; system prompts y roles,
   few-shot, chain-of-thought, plantillas/versionado de prompts, variables de contexto.
+
+## Casos observados en pruebas manuales (usar en fases futuras)
+
+| Consulta | Prompt | Resultado | Para qué sirve |
+|---|---|---|---|
+| "me cobraron dos veces" | v1 | billing, 0.9, 4 actions | El `answer` pidió **"últimos 4 dígitos de la tarjeta"** → dato sensible: caso para el **guardrail de salida (fase 9)** y para el dataset adversarial |
+| ídem | v1 | `answer` largo y con voseo | El prompt pedía "breve" y "español neutro": las instrucciones no se cumplen al 100% → justificación de evals |
+| "no me deja agregar un usuario nuevo y encima me llego una factura que no entiendo" | v2 | account, **0.55**, actions para ambos temas | Multi-intención calibrada como enseña el ejemplo few-shot → caso para el **dataset (fase 6)** |
+| "hola, quería saber si el plan anual tiene descuento" | v2 | other, 0.7 | El `answer` afirma que el plan anual "suele tener descuentos": **inventa condiciones comerciales** → guardrail de salida (fase 9) |
+| `--prompt v3` | — | argparse lo rechaza listando los disponibles | Manejo de errores de la CLI |
+| `"   "` | — | "consulta vacía", exit 1 | Validación de entrada en `main.py` |
 
 <!-- Actualizá esta sección a medida que avances: fase actual, decisiones nuevas, pendientes. -->
