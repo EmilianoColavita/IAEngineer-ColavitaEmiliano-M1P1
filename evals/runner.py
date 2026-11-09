@@ -8,7 +8,7 @@ Script simple (no pytest ni framework). Uso, desde la raíz del repo:
     python evals/runner.py --prompt v1_zero_shot                  # forma equivalente
 
 Cada corrida imprime un reporte y guarda el detalle en evals/results/ (evidencia para el
-README). Cada caso también deja su línea en data/metrics.jsonl con source="eval".
+README). Con --delay N se espacian las llamadas (rate limit). Cada caso también deja su línea en data/metrics.jsonl con source="eval".
 """
 
 import sys
@@ -20,6 +20,7 @@ if __package__ in (None, ""):
 
 import argparse  # noqa: E402
 import json  # noqa: E402
+import time  # noqa: E402
 from collections import Counter, defaultdict  # noqa: E402
 from datetime import datetime, timezone  # noqa: E402
 from typing import get_args  # noqa: E402
@@ -51,11 +52,21 @@ class AbortRun(Exception):
 
 
 def evaluate(
-    cases: list[EvalCase], prompt_name: str, provider: LLMProvider, verbose: bool = True
+    cases: list[EvalCase],
+    prompt_name: str,
+    provider: LLMProvider,
+    verbose: bool = True,
+    delay_s: float = 0.0,
 ) -> list[dict]:
-    """Corre cada caso y devuelve un resultado por caso."""
+    """Corre cada caso y devuelve un resultado por caso.
+
+    `delay_s`: pausa entre casos, para no superar el límite de requests por minuto
+    del proveedor (ej. el free tier de Gemini).
+    """
     results = []
     for i, case in enumerate(cases, start=1):
+        if delay_s and i > 1:
+            time.sleep(delay_s)
         run = run_triage(case.query, prompt_name, provider, source="eval")
 
         # Key inválida, sin saldo, modelo inexistente: no tiene sentido seguir.
@@ -75,6 +86,9 @@ def evaluate(
             "acceptable_hit": predicted in case.acceptable_categories,
             "valid": run.response is not None,
             "first_try": run.response is not None and run.record["attempts"] == 1,
+            # La API no atendió (rate limit/5xx persistente): NO es un problema de formato.
+            "provider_error": isinstance(run.error, RetryableError),
+            "guardrail": run.record.get("guardrail"),
             "error": run.record["error"],
             "answer": run.response.answer if run.response else None,
             "actions": run.response.actions if run.response else None,
@@ -102,11 +116,25 @@ def _mean(values: list[float]) -> float | None:
     return round(sum(values) / len(values), 3) if values else None
 
 
+def _is_provider_error(r: dict) -> bool:
+    # Compatibilidad con corridas guardadas antes de existir el campo "provider_error".
+    return r.get("provider_error", r.get("error") == "RetryableError")
+
+
 def summarize(results: list[dict]) -> dict:
-    """Calcula todas las métricas del reporte a partir de los resultados por caso."""
+    """Calcula todas las métricas del reporte a partir de los resultados por caso.
+
+    Distingue dos fallas que antes se mezclaban:
+      - provider_error: la API no atendió (rate limit/5xx persistente). Dice nada del prompt.
+      - JSON inválido: la API respondió pero el modelo no cumplió el contrato tras el retry.
+    `accuracy` es estricta sobre TODOS los casos; `accuracy_answered` excluye los casos que
+    la API no atendió, y es la que se usa para comparar prompts.
+    """
     n = len(results)
     correct = sum(r["correct"] for r in results)
-    valid = sum(r["valid"] for r in results)
+    answered = [r for r in results if not _is_provider_error(r)]
+    valid = sum(r["valid"] for r in answered)
+    guardrails = Counter(r.get("guardrail") for r in results if r.get("guardrail"))
 
     por_categoria = {}
     for cat in CATEGORIES:
@@ -135,8 +163,12 @@ def summarize(results: list[dict]) -> dict:
         "n": n,
         "correct": correct,
         "accuracy": _pct(correct, n),
-        "valid_json_pct": _pct(valid, n),
-        "first_try_pct": _pct(sum(r["first_try"] for r in results), n),
+        "answered": len(answered),
+        "provider_errors": n - len(answered),
+        "accuracy_answered": _pct(sum(r["correct"] for r in answered), len(answered)),
+        "valid_json_pct": _pct(valid, len(answered)),  # sobre lo que la API respondió
+        "first_try_pct": _pct(sum(r["first_try"] for r in answered), len(answered)),
+        "guardrails_triggered": dict(guardrails),
         "per_category": por_categoria,
         "per_tag": por_tag,
         "confusion": confusion,
@@ -175,7 +207,12 @@ def _fmt(value, suffix="") -> str:
 def print_report(meta: dict, s: dict) -> None:
     print(f"\n=== Evals: {meta['prompt']} | {meta['provider']} / {meta['model']} | {s['n']} casos ===\n")
     print(f"Accuracy global (estricta): {_fmt(s['accuracy'], '%')}  ({s['correct']}/{s['n']})")
+    if s["provider_errors"]:
+        print(f"Sin respuesta de la API:    {s['provider_errors']} casos (rate limit/5xx persistente)")
+        print(f"Accuracy sobre respondidos: {_fmt(s['accuracy_answered'], '%')}  (de {s['answered']})")
     print(f"JSON válido:                {_fmt(s['valid_json_pct'], '%')}")
+    if s["guardrails_triggered"]:
+        print(f"Guardrails activados:       {s['guardrails_triggered']}")
     print(f"Válido al primer intento:   {_fmt(s['first_try_pct'], '%')}")
 
     print("\nPor categoría:")
@@ -233,6 +270,8 @@ def main() -> int:
     parser.add_argument("--provider", choices=list(PROVIDERS), help="Por defecto: LLM_PROVIDER del .env")
     parser.add_argument("--model", help="Pisa el modelo del .env (comparativa de modelos)")
     parser.add_argument("--limit", type=int, help="Correr solo los primeros N casos")
+    parser.add_argument("--delay", type=float, default=0.0,
+                        help="Segundos de pausa entre casos (evita el rate limit, ej. Gemini free tier)")
     args = parser.parse_args()
 
     cases = load_dataset()
@@ -251,11 +290,12 @@ def main() -> int:
         "model": provider.model,
         "cases": len(cases),
         "dataset_full": args.limit is None,
+        "delay_s": args.delay,
         "started_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
 
     try:
-        results = evaluate(cases, args.prompt, provider)
+        results = evaluate(cases, args.prompt, provider, delay_s=args.delay)
     except AbortRun as e:
         print(f"\nCorrida abortada por error no reintentable del proveedor: {e}", file=sys.stderr)
         return 2
