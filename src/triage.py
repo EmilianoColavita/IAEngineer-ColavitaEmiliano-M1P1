@@ -17,11 +17,14 @@ from dataclasses import dataclass
 from pydantic import ValidationError
 
 from src import metrics
+from src.guardrails import blocked_response, check_input, check_output
 from src.prompts import load_prompt
 from src.providers import LLMProvider, LLMResult, ProviderError, RetryableError, get_provider
 from src.schema import TriageResponse
 
-DEFAULT_PROMPT = "v1_zero_shot"
+# Elegido con datos de evals (ver README, "Context engineering"): mayor accuracy con el
+# proveedor por defecto (OpenAI gpt-5.4-nano), según el criterio acordado antes de medir.
+DEFAULT_PROMPT = "v3_frontier_rules"
 
 # Parámetros de sampling: viven en el código, NO en el YAML, para que al comparar
 # prompts la única variable sea el texto del prompt. Se pasan a cualquier proveedor.
@@ -168,6 +171,7 @@ class TriageRun:
     response: TriageResponse | None
     record: dict  # la misma línea que se escribió en metrics.jsonl
     error: Exception | None = None
+    raw_response: TriageResponse | None = None  # la del modelo, ANTES del guardrail de salida
 
 
 def run_triage(
@@ -175,12 +179,15 @@ def run_triage(
     prompt_name: str = DEFAULT_PROMPT,
     provider: LLMProvider | None = None,
     source: str = "cli",
+    guardrails: bool = True,
 ) -> TriageRun:
     """Clasifica una consulta y devuelve respuesta + métricas, sin lanzar errores esperables.
 
+    Flujo: guardrail de entrada → LLM (retry + backoff) → Pydantic → guardrail de salida.
     Pensada para quien necesita los números de cada request (el runner de evals).
     TriageError y ProviderError quedan en `TriageRun.error` en lugar de lanzarse.
-    `source` ("cli" / "eval") permite distinguir el origen en metrics.jsonl.
+    `source` ("cli" / "eval" / "adversarial") distingue el origen en metrics.jsonl.
+    `guardrails=False` solo se usa para MEDIR su efecto en la suite adversarial.
     Cada request (exitoso o no) deja una línea en metrics.jsonl.
     """
     prompt = load_prompt(prompt_name)  # PromptError sí se lanza: es un error de uso
@@ -191,11 +198,26 @@ def run_triage(
     ]
     stats = RequestStats()
     response: TriageResponse | None = None
+    raw_response: TriageResponse | None = None
     error: Exception | None = None
+    guardrail: str | None = None
     start = time.perf_counter()
 
     try:
-        response = _run_with_retry(provider, messages, stats)
+        input_check = check_input(query) if guardrails else None
+        if input_check and input_check.blocked:
+            # Bloqueado ANTES del LLM: no se gastan tokens en un ataque.
+            guardrail = f"input:{input_check.reason}"
+            response = blocked_response(input_check)
+            print(f"[guardrail] entrada bloqueada ({input_check.reason})", file=sys.stderr)
+        else:
+            raw_response = response = _run_with_retry(provider, messages, stats)
+            if guardrails:
+                out = check_output(raw_response, prompt.system)
+                if out.triggered:
+                    response = out.response
+                    guardrail = "output:" + ",".join(out.blocked + out.flagged)
+                    print(f"[guardrail] salida: {', '.join(out.blocked + out.flagged)}", file=sys.stderr)
     except (TriageError, ProviderError) as e:
         error = e  # esperables: se devuelven, no se lanzan
     except Exception as e:
@@ -212,6 +234,7 @@ def run_triage(
             "api_retries": stats.api_retries,
             "success": response is not None,
             "error": type(error).__name__ if error else None,
+            "guardrail": guardrail,
             "category": response.category if response else None,
             "input_tokens": stats.input_tokens,
             "cached_input_tokens": stats.cached_input_tokens,
@@ -223,7 +246,7 @@ def run_triage(
         }
         metrics.log_request(record)
 
-    return TriageRun(response, record, error)
+    return TriageRun(response, record, error, raw_response)
 
 
 def triage(
