@@ -174,8 +174,7 @@ Flujo: `consulta → guardrail entrada → prompt YAML → LLMProvider → parse
   errores), chequeo de contaminación vs líneas "Consulta:" de los prompts (difflib ≥ 0.6),
   resumen `python -m evals.dataset`. `Category` se extrajo en `src/schema.py` como única
   fuente de verdad. Pendiente: registrar en `docs/ai-usage.md` que el dataset lo generó IA.
-- **Fase actual: 7 (Runner de evals).** Implementada y verificada; falta que Emiliano la revise
-  y commitee. Decisiones de Emiliano: resultados SE VERSIONAN en `evals/results/`; soportar
+- Fase 7 (Runner de evals): **completada**. Decisiones de Emiliano: resultados SE VERSIONAN en `evals/results/`; soportar
   también `python evals/runner.py` (shim de sys.path); en fase 7 correr solo v1/OpenAI.
   `src/triage.py`: `run_triage(query, prompt, provider, source) -> TriageRun(response, record,
   error)` no lanza TriageError/ProviderError (los devuelve); `triage()` es un wrapper que los
@@ -191,6 +190,28 @@ Flujo: `consulta → guardrail entrada → prompt YAML → LLMProvider → parse
   NULA (conf media 0.736 al acertar vs 0.728 al fallar); technical-03 (IVA de facturas que emite
   el cliente) → billing con conf 0.9 (error confiado); costo $0.0124 total, 530 in / 163 out
   promedio, latencia 2.0s.** Archivo: `evals/results/20261107-162530_v1_zero_shot_openai_gpt-5.4-nano.json`.
+- **2026-11-09: entrega. Emiliano pidió terminar TODAS las fases en una sesión** (se suspendió
+  la regla de plan+OK por fase para esa sesión). Estado final:
+  - Fase 8: runner separa `provider_error` (rate limit/5xx) de JSON inválido, `accuracy_answered`,
+    `--delay`; `compare.py` recalcula resúmenes desde los casos. Gemini re-corrido con `--delay 4`
+    (corridas viejas con rate limit movidas a `evals/results/archive_rate_limited/`).
+    **Elegido v3_frontier_rules** (DEFAULT_PROMPT): OpenAI v1 86.7%, v2 90.0%, v3 95.0% (3
+    corridas idénticas, frontier 90.9%).
+  - Fase 9: `src/guardrails.py` (entrada: largo + 7 patrones de injection, bloquea sin llamar
+    al LLM; salida: bloquea filtración del prompt y pedidos de datos sensibles, marca promesas).
+    0 falsos positivos en el dataset y en 501 respuestas reales. `run_triage(guardrails=...)`,
+    campo `guardrail` en métricas. `scripts/check_guardrails.py`.
+  - Fase 10: `evals/adversarial.jsonl` (10 ataques, 3 evaden la entrada a propósito) +
+    `evals/adversarial.py` (con/sin guardrails). OpenAI resistió 0/10 incluso sin guardrails;
+    con guardrails 7 se cortan antes del LLM. Gemini: 2/10 sin guardrails (adv-04 filtró el
+    prompt → lo frenó el guardrail de SALIDA; adv-08 insertó cupón) → 0/10 con guardrails.
+  - Gemini re-corrido limpio: v1 92.5%, v2 97.5%, v3 95.0% → criterio elige v2 para Gemini (v3
+    rompe billing-02 y billing-10). Default se mantiene OpenAI + v3 (latencia, robustez, sin
+    rate limit). Hallazgo: la técnica óptima depende del modelo.
+  - Fase 11: README final, `docs/ai-usage.md`, prueba desde copia limpia OK (pip install +
+    8 checks + CLI + `python evals/runner.py`; sin secretos en los archivos a subir).
+  - Pendiente (no hecho por la fecha): holdout de casos nuevos para validar v3 (sobreajuste),
+    documentado en Limitaciones.
 - Contenidos de cursada a tener en cuenta: tokenización/context window, sampling (temperatura, top-p),
   APIs de distintos proveedores, streaming, rate limits/errores, costo por token; system prompts y roles,
   few-shot, chain-of-thought, plantillas/versionado de prompts, variables de contexto.
