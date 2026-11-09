@@ -1,0 +1,1260 @@
+{
+  "meta": {
+    "prompt": "v2_few_shot",
+    "provider": "gemini",
+    "model": "gemini-3.1-flash-lite",
+    "cases": 40,
+    "dataset_full": true,
+    "started_at": "2026-11-07T16:53:31+00:00"
+  },
+  "summary": {
+    "n": 40,
+    "correct": 37,
+    "accuracy": 92.5,
+    "valid_json_pct": 92.5,
+    "first_try_pct": 92.5,
+    "per_category": {
+      "billing": {
+        "n": 10,
+        "correct": 10,
+        "accuracy": 100.0
+      },
+      "technical": {
+        "n": 10,
+        "correct": 10,
+        "accuracy": 100.0
+      },
+      "account": {
+        "n": 10,
+        "correct": 7,
+        "accuracy": 70.0
+      },
+      "other": {
+        "n": 10,
+        "correct": 10,
+        "accuracy": 100.0
+      }
+    },
+    "per_tag": {
+      "frontier": {
+        "n": 11,
+        "correct": 11,
+        "accuracy": 100.0
+      },
+      "clear": {
+        "n": 9,
+        "correct": 8,
+        "accuracy": 88.9
+      },
+      "informal": {
+        "n": 5,
+        "correct": 4,
+        "accuracy": 80.0
+      },
+      "regional": {
+        "n": 5,
+        "correct": 4,
+        "accuracy": 80.0
+      },
+      "typos": {
+        "n": 4,
+        "correct": 4,
+        "accuracy": 100.0
+      },
+      "long": {
+        "n": 4,
+        "correct": 4,
+        "accuracy": 100.0
+      },
+      "short": {
+        "n": 4,
+        "correct": 3,
+        "accuracy": 75.0
+      },
+      "angry": {
+        "n": 3,
+        "correct": 3,
+        "accuracy": 100.0
+      },
+      "multi_intent": {
+        "n": 2,
+        "correct": 1,
+        "accuracy": 50.0
+      },
+      "vague": {
+        "n": 2,
+        "correct": 2,
+        "accuracy": 100.0
+      },
+      "off_topic": {
+        "n": 2,
+        "correct": 2,
+        "accuracy": 100.0
+      }
+    },
+    "confusion": {
+      "billing": {
+        "billing": 10
+      },
+      "technical": {
+        "technical": 10
+      },
+      "account": {
+        "account": 7,
+        "(inválido)": 3
+      },
+      "other": {
+        "other": 10
+      }
+    },
+    "acceptable": {
+      "cases": 5,
+      "correct": 4,
+      "acceptable_hits": 0
+    },
+    "calibration": {
+      "mean_confidence_correct": 0.915,
+      "mean_confidence_wrong": null
+    },
+    "cost_usd_total": 0.015656,
+    "cost_usd_per_case": 0.00039141,
+    "input_tokens_avg": 1037.025,
+    "output_tokens_avg": 88.1,
+    "latency_s_avg": 2.197,
+    "latency_s_max": 12.557,
+    "api_retries_total": 15,
+    "failures": [
+      {
+        "id": "account-05",
+        "expected": "account",
+        "predicted": "(inválido)",
+        "confidence": null,
+        "acceptable_hit": false,
+        "query": "che, cómo hago para que mi socio también sea administrador?"
+      },
+      {
+        "id": "account-06",
+        "expected": "account",
+        "predicted": "(inválido)",
+        "confidence": null,
+        "acceptable_hit": false,
+        "query": "necesito dar de alta 2 usuarios nuevos y que también me expliquen por qué este mes pagué más que el anterior"
+      },
+      {
+        "id": "account-07",
+        "expected": "account",
+        "predicted": "(inválido)",
+        "confidence": null,
+        "acceptable_hit": false,
+        "query": "olvidé mi contraseña"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "billing-01",
+      "query": "Buenas, en el resumen de la tarjeta me aparecen dos cargos de Nubbix del mismo día y por el mismo monto. Uno lo tienen que devolver.",
+      "expected": "billing",
+      "acceptable": [],
+      "tags": [
+        "clear"
+      ],
+      "predicted": "billing",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Lamentamos el inconveniente con el cobro duplicado. Un agente va a revisar el estado de tus facturas y los movimientos de tu cuenta para gestionar la corrección correspondiente.",
+      "actions": [
+        "Verificar el historial de facturación del cliente",
+        "Identificar si existen dos cargos duplicados en el procesador de pagos",
+        "Solicitar comprobantes de los cargos al cliente si es necesario"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1127,
+      "output_tokens": 100,
+      "latency_s": 1.303,
+      "cost_usd": 0.00043175
+    },
+    {
+      "id": "billing-02",
+      "query": "necesito que me reemitan la factura de octubre como factura A con los datos fiscales de la empresa, me la hicieron como consumidor final",
+      "expected": "billing",
+      "acceptable": [],
+      "tags": [
+        "clear"
+      ],
+      "predicted": "billing",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Entiendo tu solicitud. Un agente va a revisar la factura de octubre para gestionar la anulación y la correcta emisión como factura A con tus datos fiscales.",
+      "actions": [
+        "Verificar la factura emitida en octubre",
+        "Solicitar los datos fiscales actualizados al cliente",
+        "Gestionar la nota de crédito y la reemisión de la factura"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1125,
+      "output_tokens": 89,
+      "latency_s": 1.722,
+      "cost_usd": 0.00041475
+    },
+    {
+      "id": "billing-03",
+      "query": "me cobraron el plan pro pero yo tengo el basico q onda??",
+      "expected": "billing",
+      "acceptable": [],
+      "tags": [
+        "typos",
+        "informal"
+      ],
+      "predicted": "billing",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Lamentamos el inconveniente con el cobro de tu suscripción. Un agente va a revisar tu plan actual y los cargos realizados para aclarar esta situación a la brevedad.",
+      "actions": [
+        "Verificar el plan activo del cliente en el sistema",
+        "Comparar el plan activo con el cargo facturado",
+        "Revisar el historial de cambios de plan en la cuenta"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1111,
+      "output_tokens": 96,
+      "latency_s": 0.902,
+      "cost_usd": 0.00042175
+    },
+    {
+      "id": "billing-04",
+      "query": "Quiero cambiar la tarjeta con la que se paga la suscripción porque la que tengo cargada se vence este mes.",
+      "expected": "billing",
+      "acceptable": [],
+      "tags": [
+        "frontier"
+      ],
+      "predicted": "billing",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Entendido. Un agente de soporte te contactará para indicarte los pasos seguros para actualizar los datos de tu tarjeta de crédito y evitar interrupciones en tu suscripción.",
+      "actions": [
+        "Verificar el método de pago actual",
+        "Proveer el enlace seguro para la actualización de datos de facturación"
+      ],
+      "attempts": 1,
+      "api_retries": 1,
+      "input_tokens": 1120,
+      "output_tokens": 81,
+      "latency_s": 2.272,
+      "cost_usd": 0.0004015
+    },
+    {
+      "id": "billing-05",
+      "query": "ES LA TERCERA VEZ QUE ME COBRAN UN AUMENTO QUE NADIE ME AVISÓ. QUIERO UNA EXPLICACIÓN YA",
+      "expected": "billing",
+      "acceptable": [],
+      "tags": [
+        "angry"
+      ],
+      "predicted": "billing",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Lamentamos mucho la molestia causada por los cargos en tu suscripción. Un agente de nuestro equipo revisará el historial de facturación de tu cuenta y se pondrá en contacto contigo para brindarte la información necesaria.",
+      "actions": [
+        "Revisar el historial de facturación del cliente",
+        "Verificar si hubo notificaciones de cambios de precio enviadas",
+        "Preparar un resumen de los cargos realizados"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1127,
+      "output_tokens": 103,
+      "latency_s": 0.957,
+      "cost_usd": 0.00043625
+    },
+    {
+      "id": "billing-06",
+      "query": "Oigan, ¿por qué el cargo de este mes me salió en dólares y no en pesos mexicanos? El banco me cobró comisión por eso.",
+      "expected": "billing",
+      "acceptable": [],
+      "tags": [
+        "regional"
+      ],
+      "predicted": "billing",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Lamentamos el inconveniente con la moneda de cobro. Un agente revisará la configuración de facturación de tu cuenta para verificar por qué se realizó el cargo en dólares y te contactará a la brevedad.",
+      "actions": [
+        "Verificar la configuración de moneda en la cuenta del cliente",
+        "Revisar el historial de facturación",
+        "Consultar con el área administrativa sobre el método de cobro aplicado"
+      ],
+      "attempts": 1,
+      "api_retries": 3,
+      "input_tokens": 1126,
+      "output_tokens": 104,
+      "latency_s": 11.438,
+      "cost_usd": 0.0004375
+    },
+    {
+      "id": "billing-07",
+      "query": "si me paso al plan anual ahora me descuentan lo que ya pague este mes o lo pierdo?",
+      "expected": "billing",
+      "acceptable": [],
+      "tags": [
+        "frontier",
+        "typos"
+      ],
+      "predicted": "billing",
+      "confidence": 0.9,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Gracias por tu consulta. Un agente revisará tu cuenta para informarte cómo se aplicaría el prorrateo en caso de realizar el cambio a un plan anual.",
+      "actions": [
+        "Verificar el estado actual de la suscripción del cliente",
+        "Calcular el saldo a favor por el periodo ya pagado",
+        "Informar sobre la política de cambios de plan"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1118,
+      "output_tokens": 92,
+      "latency_s": 1.022,
+      "cost_usd": 0.0004175
+    },
+    {
+      "id": "billing-08",
+      "query": "Hola, cómo están. Les cuento que tenemos una ferretería chica en el barrio y venimos usando Nubbix hace como un año, la verdad que bien. El tema es que por cuestiones económicas decidimos cerrar el local a fin de mes, así que quería dar de baja la suscripción y saber si me devuelven lo proporcional de los días que no voy a usar. Gracias!",
+      "expected": "billing",
+      "acceptable": [
+        "account"
+      ],
+      "tags": [
+        "long",
+        "frontier"
+      ],
+      "predicted": "billing",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Lamentamos mucho escuchar sobre el cierre de su local. Un agente de nuestro equipo se pondrá en contacto con usted para gestionar la baja de la suscripción y revisar el estado de su cuenta respecto a los días pendientes.",
+      "actions": [
+        "Gestionar la baja de la suscripción",
+        "Revisar la política de reembolsos para días proporcionales",
+        "Contactar al cliente para confirmar la fecha de baja"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1176,
+      "output_tokens": 104,
+      "latency_s": 1.01,
+      "cost_usd": 0.00045
+    },
+    {
+      "id": "billing-09",
+      "query": "factura septiembre?",
+      "expected": "billing",
+      "acceptable": [],
+      "tags": [
+        "short"
+      ],
+      "predicted": "billing",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Hola. Con gusto te ayudamos a localizar tu factura de septiembre. Un agente revisará tu historial de facturación y te enviará el comprobante correspondiente.",
+      "actions": [
+        "Buscar la factura de septiembre en el sistema",
+        "Enviar el comprobante al cliente"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1100,
+      "output_tokens": 72,
+      "latency_s": 0.786,
+      "cost_usd": 0.000383
+    },
+    {
+      "id": "billing-10",
+      "query": "me llegó la factura con el CUIT mal y además el usuario de mi contadora no puede ver los reportes",
+      "expected": "billing",
+      "acceptable": [
+        "account"
+      ],
+      "tags": [
+        "multi_intent"
+      ],
+      "predicted": "billing",
+      "confidence": 0.65,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Lamentamos los inconvenientes. Vamos a gestionar la corrección de los datos en tu factura y revisaremos los permisos de acceso de tu contadora para que pueda visualizar los reportes correctamente.",
+      "actions": [
+        "Corregir los datos fiscales en la cuenta del cliente",
+        "Verificar los permisos y roles asignados al usuario de la contadora",
+        "Revisar si hay restricciones de acceso a reportes para perfiles secundarios"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1119,
+      "output_tokens": 107,
+      "latency_s": 1.16,
+      "cost_usd": 0.00044025
+    },
+    {
+      "id": "technical-01",
+      "query": "Desde la actualización de anoche el módulo de stock no me deja guardar productos nuevos, el botón de guardar se queda girando y no pasa nada.",
+      "expected": "technical",
+      "acceptable": [],
+      "tags": [
+        "clear"
+      ],
+      "predicted": "technical",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Lamentamos el inconveniente que estás experimentando con el módulo de stock tras la actualización. Un agente técnico revisará el error para que puedas volver a guardar tus productos a la brevedad.",
+      "actions": [
+        "Verificar logs de errores en el módulo de stock",
+        "Reproducir el error en entorno de pruebas",
+        "Notificar al equipo de desarrollo sobre el fallo en el botón de guardar"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1126,
+      "output_tokens": 99,
+      "latency_s": 0.981,
+      "cost_usd": 0.00043
+    },
+    {
+      "id": "technical-02",
+      "query": "la app del celular se cierra sola apenas la abro, tengo android",
+      "expected": "technical",
+      "acceptable": [],
+      "tags": [
+        "clear",
+        "informal"
+      ],
+      "predicted": "technical",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Lamentamos el inconveniente con la aplicación. Un agente técnico va a revisar el reporte de errores para identificar por qué se cierra la app en tu dispositivo y contactarte con una solución.",
+      "actions": [
+        "Verificar si hay reportes de errores similares en la versión actual de Android",
+        "Solicitar al cliente la versión de Android y el modelo de su dispositivo",
+        "Revisar logs de errores de la aplicación móvil"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1110,
+      "output_tokens": 105,
+      "latency_s": 0.992,
+      "cost_usd": 0.000435
+    },
+    {
+      "id": "technical-03",
+      "query": "El sistema le está generando las facturas a mis clientes con el IVA mal calculado, les sale un 10,5% cuando tendría que ser 21%.",
+      "expected": "technical",
+      "acceptable": [],
+      "tags": [
+        "frontier"
+      ],
+      "predicted": "technical",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Lamentamos el inconveniente con el cálculo del IVA en tus facturas. Un agente técnico revisará la configuración de tus impuestos para identificar por qué se está aplicando una alícuota incorrecta y corregirlo a la brevedad.",
+      "actions": [
+        "Revisar la configuración de impuestos en la cuenta del cliente",
+        "Verificar si el error ocurre en todos los productos o en alguno específico",
+        "Corregir la configuración de alícuotas si es necesario"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1130,
+      "output_tokens": 115,
+      "latency_s": 0.982,
+      "cost_usd": 0.000455
+    },
+    {
+      "id": "technical-04",
+      "query": "Cuando entro con mi usuario me aparece la pantalla en blanco, pero mi socio entra bien desde su computadora.",
+      "expected": "technical",
+      "acceptable": [],
+      "tags": [
+        "frontier"
+      ],
+      "predicted": "technical",
+      "confidence": 0.85,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Lamentamos el inconveniente al intentar ingresar. Un agente va a revisar el estado de tu usuario y la configuración de tu cuenta para identificar por qué no lográs visualizar la plataforma correctamente.",
+      "actions": [
+        "Verificar si hay restricciones de acceso o permisos específicos para el usuario",
+        "Solicitar al cliente que pruebe en modo incógnito o borre caché",
+        "Revisar logs de errores asociados al usuario en el sistema"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1117,
+      "output_tokens": 106,
+      "latency_s": 1.146,
+      "cost_usd": 0.00043825
+    },
+    {
+      "id": "technical-05",
+      "query": "no me inprime los tikets desde ayer, la impresora fiscal esta conectada y prendida",
+      "expected": "technical",
+      "acceptable": [],
+      "tags": [
+        "typos"
+      ],
+      "predicted": "technical",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Lamentamos el inconveniente con la impresión de tus tickets. Un agente técnico revisará el estado de la integración con tu impresora fiscal para identificar por qué no está respondiendo.",
+      "actions": [
+        "Verificar el estado de la integración con la impresora fiscal",
+        "Revisar logs de errores de impresión en la cuenta del cliente",
+        "Solicitar al cliente el modelo de la impresora y el mensaje de error exacto"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1115,
+      "output_tokens": 104,
+      "latency_s": 1.058,
+      "cost_usd": 0.00043475
+    },
+    {
+      "id": "technical-06",
+      "query": "llevo 3 horas sin poder facturar y tengo el local lleno de gente!!! esto es un desastre, solucionenlo",
+      "expected": "technical",
+      "acceptable": [],
+      "tags": [
+        "angry",
+        "frontier"
+      ],
+      "predicted": "technical",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Lamentamos mucho el inconveniente que estás teniendo con la facturación en tu local. Entendemos la urgencia y un agente técnico va a revisar el estado de tu cuenta y del servicio de forma prioritaria para ayudarte a retomar la operación.",
+      "actions": [
+        "Verificar si hay una caída general del servicio de facturación",
+        "Revisar logs de error del usuario para identificar el bloqueo",
+        "Priorizar el ticket en la cola de soporte técnico"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1123,
+      "output_tokens": 112,
+      "latency_s": 1.101,
+      "cost_usd": 0.00044875
+    },
+    {
+      "id": "technical-07",
+      "query": "Buenas tardes, el reporte de cierre de caja me está saliendo con cifras que no cuadran con lo que vendí hoy, ¿me colaboran por fa?",
+      "expected": "technical",
+      "acceptable": [],
+      "tags": [
+        "regional"
+      ],
+      "predicted": "technical",
+      "confidence": 0.9,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Hola, lamentamos el inconveniente con el reporte de cierre de caja. Un agente técnico revisará los datos de tus transacciones de hoy para identificar por qué no coinciden con el reporte y te contactará a la brevedad.",
+      "actions": [
+        "Verificar logs de transacciones del día para el usuario",
+        "Comparar el reporte de cierre con los registros de ventas individuales",
+        "Escalar a soporte técnico si se detecta una inconsistencia en el cálculo del sistema"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1129,
+      "output_tokens": 114,
+      "latency_s": 1.06,
+      "cost_usd": 0.00045325
+    },
+    {
+      "id": "technical-08",
+      "query": "algo raro pasa con el sistema desde hoy",
+      "expected": "technical",
+      "acceptable": [],
+      "tags": [
+        "vague"
+      ],
+      "predicted": "technical",
+      "confidence": 0.4,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Lamentamos el inconveniente. Para poder ayudarte, ¿podrías darnos más detalles sobre qué es lo que no está funcionando correctamente o si te aparece algún mensaje de error en particular?",
+      "actions": [
+        "Pedir al cliente detalles específicos del error",
+        "Verificar el estado de los servicios en el panel de control",
+        "Consultar si el problema ocurre en una sección específica del sistema"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1104,
+      "output_tokens": 98,
+      "latency_s": 1.035,
+      "cost_usd": 0.000423
+    },
+    {
+      "id": "technical-09",
+      "query": "Les escribo porque desde la semana pasada el sistema anda lentísimo. Al principio pensé que era mi internet, pero probé desde otra conexión y pasa lo mismo. Cargar la lista de clientes tarda como un minuto y a veces directamente se corta. Somos 3 personas usando el sistema al mismo tiempo, no sé si eso influye.",
+      "expected": "technical",
+      "acceptable": [],
+      "tags": [
+        "long"
+      ],
+      "predicted": "technical",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Lamentamos mucho los inconvenientes de rendimiento que están experimentando. Un agente técnico va a revisar el estado de la plataforma y los registros de acceso de tu cuenta para identificar qué está causando esta lentitud.",
+      "actions": [
+        "Verificar el estado de los servidores y latencia en la cuenta del cliente",
+        "Revisar logs de errores en la carga de la lista de clientes",
+        "Analizar si hay cuellos de botella por concurrencia de usuarios"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1164,
+      "output_tokens": 134,
+      "latency_s": 1.022,
+      "cost_usd": 0.000492
+    },
+    {
+      "id": "technical-10",
+      "query": "error 403 al exportar",
+      "expected": "technical",
+      "acceptable": [
+        "account"
+      ],
+      "tags": [
+        "short",
+        "frontier"
+      ],
+      "predicted": "technical",
+      "confidence": 0.9,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Lamentamos el inconveniente al intentar exportar tus datos. Un agente técnico revisará los permisos de tu usuario y el estado de la función para resolver este error a la brevedad.",
+      "actions": [
+        "Verificar los permisos del usuario para la función de exportación",
+        "Revisar los logs del servidor para identificar el origen del error 403",
+        "Verificar si el error ocurre en todos los reportes o solo en uno específico"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1104,
+      "output_tokens": 110,
+      "latency_s": 1.174,
+      "cost_usd": 0.000441
+    },
+    {
+      "id": "account-01",
+      "query": "¿Cómo le saco el acceso a un empleado que ya no trabaja con nosotros?",
+      "expected": "account",
+      "acceptable": [],
+      "tags": [
+        "clear"
+      ],
+      "predicted": "account",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Para gestionar los accesos de tus empleados, podés ingresar a la configuración de usuarios desde tu panel de control. Un agente te contactará para guiarte en el proceso y asegurar que el acceso sea revocado correctamente.",
+      "actions": [
+        "Explicar al cliente cómo acceder al panel de gestión de usuarios",
+        "Verificar si el usuario a eliminar tiene permisos de administrador"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1112,
+      "output_tokens": 95,
+      "latency_s": 0.967,
+      "cost_usd": 0.0004205
+    },
+    {
+      "id": "account-02",
+      "query": "quiero que mi encargado pueda cargar ventas pero que no vea los reportes de ganancias, se puede?",
+      "expected": "account",
+      "acceptable": [],
+      "tags": [
+        "clear",
+        "informal"
+      ],
+      "predicted": "account",
+      "confidence": 0.9,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Hola! Entendemos tu consulta. Es posible configurar los permisos de los usuarios para limitar el acceso a ciertas secciones. Un agente revisará tu configuración actual y te indicará cómo ajustar los roles de tu encargado para que pueda cargar ventas sin visualizar los reportes de ganancias.",
+      "actions": [
+        "Verificar los roles y permisos actuales de la cuenta",
+        "Explicar al cliente cómo configurar los permisos de usuario desde el panel de control"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1117,
+      "output_tokens": 107,
+      "latency_s": 1.198,
+      "cost_usd": 0.00043975
+    },
+    {
+      "id": "account-03",
+      "query": "Activé la verificación en dos pasos y después cambié de celular, ahora no me llegan los códigos para entrar.",
+      "expected": "account",
+      "acceptable": [],
+      "tags": [
+        "frontier"
+      ],
+      "predicted": "account",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Entendemos el inconveniente con el acceso a tu cuenta tras el cambio de dispositivo. Un agente va a revisar tu configuración de seguridad para ayudarte a restablecer el acceso a la plataforma.",
+      "actions": [
+        "Verificar la identidad del usuario",
+        "Desactivar temporalmente la verificación en dos pasos para permitir el acceso",
+        "Guiar al usuario en la reconfiguración del segundo factor en su nuevo dispositivo"
+      ],
+      "attempts": 1,
+      "api_retries": 1,
+      "input_tokens": 1119,
+      "output_tokens": 102,
+      "latency_s": 2.857,
+      "cost_usd": 0.00043275
+    },
+    {
+      "id": "account-04",
+      "query": "kiero cambiar el nombre de la empresa q aparece en la cuenta xq nos cambiamos de razon social",
+      "expected": "account",
+      "acceptable": [],
+      "tags": [
+        "typos",
+        "frontier"
+      ],
+      "predicted": "account",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Entendido. Para realizar el cambio de razón social en tu cuenta, un agente va a revisar los datos actuales y te indicará los pasos a seguir para actualizar la información de tu empresa.",
+      "actions": [
+        "Verificar los datos actuales de la empresa en el sistema",
+        "Solicitar documentación respaldatoria si es necesario para el cambio de razón social",
+        "Actualizar el nombre de la empresa en la configuración de la cuenta"
+      ],
+      "attempts": 1,
+      "api_retries": 1,
+      "input_tokens": 1117,
+      "output_tokens": 104,
+      "latency_s": 2.755,
+      "cost_usd": 0.00043525
+    },
+    {
+      "id": "account-05",
+      "query": "che, cómo hago para que mi socio también sea administrador?",
+      "expected": "account",
+      "acceptable": [],
+      "tags": [
+        "informal",
+        "regional"
+      ],
+      "predicted": "(inválido)",
+      "confidence": null,
+      "correct": false,
+      "acceptable_hit": false,
+      "valid": false,
+      "first_try": false,
+      "error": "RetryableError",
+      "answer": null,
+      "actions": null,
+      "attempts": 0,
+      "api_retries": 3,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "latency_s": 10.378,
+      "cost_usd": 0.0
+    },
+    {
+      "id": "account-06",
+      "query": "necesito dar de alta 2 usuarios nuevos y que también me expliquen por qué este mes pagué más que el anterior",
+      "expected": "account",
+      "acceptable": [
+        "billing"
+      ],
+      "tags": [
+        "multi_intent"
+      ],
+      "predicted": "(inválido)",
+      "confidence": null,
+      "correct": false,
+      "acceptable_hit": false,
+      "valid": false,
+      "first_try": false,
+      "error": "RetryableError",
+      "answer": null,
+      "actions": null,
+      "attempts": 0,
+      "api_retries": 3,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "latency_s": 11.377,
+      "cost_usd": 0.0
+    },
+    {
+      "id": "account-07",
+      "query": "olvidé mi contraseña",
+      "expected": "account",
+      "acceptable": [],
+      "tags": [
+        "short",
+        "clear"
+      ],
+      "predicted": "(inválido)",
+      "confidence": null,
+      "correct": false,
+      "acceptable_hit": false,
+      "valid": false,
+      "first_try": false,
+      "error": "RetryableError",
+      "answer": null,
+      "actions": null,
+      "attempts": 0,
+      "api_retries": 3,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "latency_s": 12.557,
+      "cost_usd": 0.0
+    },
+    {
+      "id": "account-08",
+      "query": "ALGUIEN ENTRÓ A MI CUENTA Y CAMBIÓ LOS PRECIOS DE TODOS LOS PRODUCTOS, NO FUI YO!!",
+      "expected": "account",
+      "acceptable": [],
+      "tags": [
+        "angry"
+      ],
+      "predicted": "account",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Lamentamos mucho este inconveniente de seguridad. Un agente va a revisar inmediatamente el registro de actividad de tu cuenta para identificar los cambios realizados y ayudarte a restaurar la información.",
+      "actions": [
+        "Revisar logs de auditoría de la cuenta",
+        "Bloquear sesiones activas sospechosas",
+        "Solicitar al cliente el cambio de contraseña",
+        "Verificar si hubo cambios en los permisos de usuario"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1125,
+      "output_tokens": 102,
+      "latency_s": 1.648,
+      "cost_usd": 0.00043425
+    },
+    {
+      "id": "account-09",
+      "query": "Hola, necesito traspasar la cuenta a nombre de mi hermano porque él se va a hacer cargo del negocio po",
+      "expected": "account",
+      "acceptable": [],
+      "tags": [
+        "regional"
+      ],
+      "predicted": "account",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Hola. Entiendo que necesitas realizar un cambio de titularidad en tu cuenta. Un agente de soporte se pondrá en contacto contigo para solicitarte la información necesaria y realizar el proceso de forma segura.",
+      "actions": [
+        "Verificar los datos actuales del titular",
+        "Solicitar documentación o autorización para el cambio de titularidad",
+        "Actualizar los datos de contacto en el sistema"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1118,
+      "output_tokens": 95,
+      "latency_s": 1.194,
+      "cost_usd": 0.000422
+    },
+    {
+      "id": "account-10",
+      "query": "Tenemos dos sucursales y cada una tiene su propia cuenta en Nubbix desde que empezamos. Ahora queremos manejar todo desde una sola cuenta, con usuarios para cada sucursal, pero sin perder el historial de ventas de ninguna. ¿Se puede unificar?",
+      "expected": "account",
+      "acceptable": [],
+      "tags": [
+        "long"
+      ],
+      "predicted": "account",
+      "confidence": 0.9,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Hola! Es una excelente consulta. Unificar las cuentas es posible, pero requiere un proceso de migración de datos para asegurar que no pierdas información. Un agente especializado se pondrá en contacto contigo para evaluar la mejor forma de realizar esta integración y configurar los permisos de usuario por sucursal.",
+      "actions": [
+        "Consultar con el equipo técnico la viabilidad de migración de datos entre cuentas",
+        "Contactar al cliente para explicar el proceso de unificación",
+        "Verificar los planes actuales de ambas cuentas"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1149,
+      "output_tokens": 123,
+      "latency_s": 1.179,
+      "cost_usd": 0.00047175
+    },
+    {
+      "id": "other-01",
+      "query": "¿Tienen algún curso o capacitación para aprender a usar el sistema?",
+      "expected": "other",
+      "acceptable": [],
+      "tags": [
+        "clear"
+      ],
+      "predicted": "other",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Hola! Gracias por tu interés en aprender más sobre Nubbix. Un asesor se pondrá en contacto contigo para brindarte información sobre nuestras capacitaciones y recursos de aprendizaje disponibles.",
+      "actions": [
+        "Derivar al equipo comercial o de customer success",
+        "Enviar enlaces a la base de conocimientos o centro de ayuda"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1110,
+      "output_tokens": 83,
+      "latency_s": 0.818,
+      "cost_usd": 0.000402
+    },
+    {
+      "id": "other-02",
+      "query": "Quisiera saber cuánto sale el plan para 5 usuarios",
+      "expected": "other",
+      "acceptable": [],
+      "tags": [
+        "clear"
+      ],
+      "predicted": "other",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Gracias por tu interés en Nubbix! Un asesor comercial se pondrá en contacto contigo a la brevedad para brindarte información detallada sobre nuestros planes y opciones para 5 usuarios.",
+      "actions": [
+        "Derivar al equipo comercial",
+        "Preparar información sobre planes para múltiples usuarios"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1108,
+      "output_tokens": 78,
+      "latency_s": 0.929,
+      "cost_usd": 0.000394
+    },
+    {
+      "id": "other-03",
+      "query": "cuál es la capital de Francia?",
+      "expected": "other",
+      "acceptable": [],
+      "tags": [
+        "off_topic"
+      ],
+      "predicted": "other",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "La capital de Francia es París. Si tenés alguna consulta sobre el uso de nuestra plataforma Nubbix, no dudes en escribirnos.",
+      "actions": [],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1104,
+      "output_tokens": 52,
+      "latency_s": 0.785,
+      "cost_usd": 0.000354
+    },
+    {
+      "id": "other-04",
+      "query": "me podés ayudar a escribir un mail para mi proveedor reclamándole un pedido que no llegó?",
+      "expected": "other",
+      "acceptable": [],
+      "tags": [
+        "off_topic"
+      ],
+      "predicted": "other",
+      "confidence": 0.9,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Hola. Como somos una plataforma de gestión, no redactamos correos externos para proveedores, pero podemos ayudarte con cualquier duda sobre cómo registrar ese pedido o gestionar tus compras dentro de Nubbix.",
+      "actions": [],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1115,
+      "output_tokens": 62,
+      "latency_s": 0.945,
+      "cost_usd": 0.00037175
+    },
+    {
+      "id": "other-05",
+      "query": "hola",
+      "expected": "other",
+      "acceptable": [],
+      "tags": [
+        "short",
+        "vague"
+      ],
+      "predicted": "other",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Hola! Gracias por contactarte con Nubbix. ¿En qué podemos ayudarte hoy?",
+      "actions": [],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1097,
+      "output_tokens": 43,
+      "latency_s": 0.801,
+      "cost_usd": 0.00033875
+    },
+    {
+      "id": "other-06",
+      "query": "buen día, solo quería decirles que la nueva pantalla de ventas quedó buenísima 👏👏",
+      "expected": "other",
+      "acceptable": [],
+      "tags": [
+        "informal"
+      ],
+      "predicted": "other",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Muchas gracias por tus comentarios! Nos alegra mucho saber que la nueva pantalla de ventas te resulta útil. Estamos a tu disposición para cualquier otra consulta.",
+      "actions": [],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1115,
+      "output_tokens": 55,
+      "latency_s": 0.813,
+      "cost_usd": 0.00036125
+    },
+    {
+      "id": "other-07",
+      "query": "¿Nubbix funciona sin internet? La semana que viene voy a vender en una feria donde no hay señal.",
+      "expected": "other",
+      "acceptable": [],
+      "tags": [
+        "frontier"
+      ],
+      "predicted": "other",
+      "confidence": 0.9,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "Nubbix es una plataforma basada en la nube, por lo que requiere conexión a internet para sincronizar tus datos y facturar en tiempo real. Un asesor se pondrá en contacto contigo para evaluar si existe alguna alternativa o configuración que pueda ayudarte en tu evento.",
+      "actions": [
+        "Explicar la naturaleza SaaS de la plataforma",
+        "Derivar al equipo comercial para asesoramiento sobre uso offline o alternativas"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1119,
+      "output_tokens": 100,
+      "latency_s": 0.946,
+      "cost_usd": 0.00042975
+    },
+    {
+      "id": "other-08",
+      "query": "si me suscribo, ¿puedo pagar con transferencia bancaria o solo con tarjeta?",
+      "expected": "other",
+      "acceptable": [
+        "billing"
+      ],
+      "tags": [
+        "frontier"
+      ],
+      "predicted": "other",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Gracias por tu interés en Nubbix! Un asesor comercial se pondrá en contacto contigo para informarte sobre los medios de pago disponibles para tu suscripción.",
+      "actions": [
+        "Derivar al equipo comercial",
+        "Informar sobre los métodos de pago habilitados según el país del cliente"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1115,
+      "output_tokens": 78,
+      "latency_s": 0.805,
+      "cost_usd": 0.00039575
+    },
+    {
+      "id": "other-09",
+      "query": "¿Tienen distribuidores en Guadalajara? Me interesaría revender el sistema a mis clientes.",
+      "expected": "other",
+      "acceptable": [],
+      "tags": [
+        "regional"
+      ],
+      "predicted": "other",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Gracias por tu interés en Nubbix! Un asesor comercial se pondrá en contacto contigo para conversar sobre nuestras opciones de alianza y reventa en tu región.",
+      "actions": [
+        "Derivar al equipo comercial",
+        "Informar sobre el programa de partners o distribuidores"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1115,
+      "output_tokens": 93,
+      "latency_s": 0.818,
+      "cost_usd": 0.00041825
+    },
+    {
+      "id": "other-10",
+      "query": "Somos una cadena de farmacias con 12 locales y estamos evaluando cambiar de sistema. Necesitaríamos saber si manejan control de vencimientos por lote, si tienen integración con obras sociales y si ofrecen migración de datos desde nuestro sistema actual. ¿Podemos agendar una demo?",
+      "expected": "other",
+      "acceptable": [],
+      "tags": [
+        "long"
+      ],
+      "predicted": "other",
+      "confidence": 0.95,
+      "correct": true,
+      "acceptable_hit": false,
+      "valid": true,
+      "first_try": true,
+      "error": null,
+      "answer": "¡Muchas gracias por contactarnos! Es un gusto saludarlos. Un asesor comercial se pondrá en contacto con ustedes a la brevedad para responder sus dudas sobre la gestión de lotes, integraciones y el proceso de migración, además de coordinar una demo personalizada.",
+      "actions": [
+        "Derivar al equipo comercial",
+        "Preparar información sobre gestión de lotes y vencimientos",
+        "Consultar disponibilidad para agendar una demo"
+      ],
+      "attempts": 1,
+      "api_retries": 0,
+      "input_tokens": 1155,
+      "output_tokens": 107,
+      "latency_s": 1.001,
+      "cost_usd": 0.00044925
+    }
+  ]
+}
