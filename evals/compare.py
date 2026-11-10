@@ -14,13 +14,17 @@ Criterio de decisión (acordado ANTES de ver los resultados), por proveedor/mode
      se desempata por accuracy en "frontier" y después por menor costo por caso.
 """
 
-import argparse
-import json
 import sys
-from collections import defaultdict
 from pathlib import Path
 
-from evals.runner import RESULTS_DIR, summarize
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+import argparse  # noqa: E402
+import json  # noqa: E402
+from collections import defaultdict  # noqa: E402
+
+from evals.runner import RESULTS_DIR, summarize  # noqa: E402
 
 CATEGORIES = ("billing", "technical", "account", "other")
 MIN_VALID_JSON = 95.0
@@ -214,4 +218,7 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    from src.console import use_utf8_output
+
+    use_utf8_output()
     sys.exit(main())

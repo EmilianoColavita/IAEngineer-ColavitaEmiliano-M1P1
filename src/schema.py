@@ -172,4 +172,7 @@ def correr_casos() -> bool:
 
 
 if __name__ == "__main__":
+    from src.console import use_utf8_output
+
+    use_utf8_output()
     raise SystemExit(0 if correr_casos() else 1)

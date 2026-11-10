@@ -117,4 +117,7 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    from src.console import use_utf8_output
+
+    use_utf8_output()
     sys.exit(main())

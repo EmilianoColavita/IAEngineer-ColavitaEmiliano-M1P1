@@ -189,6 +189,7 @@ consulta
 | `src/schema.py` | Contrato Pydantic de la respuesta |
 | `src/guardrails.py` | Guardrails de entrada y de salida |
 | `src/metrics.py` | Precios, costo y escritura append-only de métricas |
+| `src/console.py` | Fuerza salida UTF-8 (evita `UnicodeEncodeError` en Windows al redirigir a un archivo) |
 
 ## Context engineering: técnica elegida y por qué
 
@@ -529,6 +530,7 @@ en stderr y registrado en las métricas.
 │   ├── guardrails.py      # guardrails de entrada y salida
 │   ├── prompts.py         # carga y valida los prompts YAML
 │   ├── metrics.py         # costo por request + escritura en data/metrics.jsonl
+│   ├── console.py         # salida UTF-8 para Windows
 │   └── schema.py          # contrato Pydantic + casos de prueba
 ├── prompts/
 │   ├── v1_zero_shot.yaml

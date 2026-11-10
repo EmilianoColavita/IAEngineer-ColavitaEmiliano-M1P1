@@ -87,7 +87,8 @@ nubbix-triage/
 │   ├── prompts.py       # carga de prompts YAML
 │   ├── triage.py        # lógica: llamar, validar, reintentar
 │   ├── guardrails.py    # guardrails de entrada y salida
-│   └── metrics.py       # cálculo de costo + append a JSONL
+│   ├── metrics.py       # cálculo de costo + append a JSONL
+│   └── console.py       # salida UTF-8 (Windows, salida redirigida)
 ├── prompts/             # v1_zero_shot.yaml, v2_few_shot.yaml, ...
 ├── evals/               # dataset.jsonl, runner.py, adversarial.jsonl
 ├── data/                # metrics.jsonl

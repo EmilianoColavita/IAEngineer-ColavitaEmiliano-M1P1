@@ -91,4 +91,7 @@ def main():
 
 
 if __name__ == "__main__":
+    # Este script corre suelto (sin importar src/): misma lógica que src/console.py.
+    for stream in (sys.stdout, sys.stderr):
+        stream.reconfigure(encoding="utf-8", errors="replace")
     main()

@@ -3,3 +3,6 @@ google-genai==2.34.0
 python-dotenv==1.2.4
 pydantic==2.14.2
 pyyaml==6.0.3
+# Importados directamente en src/providers.py para capturar errores de red (también los traen los SDKs).
+httpx==0.28.1
+httpx2==2.16.0

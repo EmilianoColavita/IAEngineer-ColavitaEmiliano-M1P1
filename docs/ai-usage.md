@@ -67,6 +67,3 @@ La IA se equivocó varias veces; estos son los casos más relevantes y cómo se 
 - **Reglas de v3 escritas viendo los fallos del dataset.** El mismo dataset se usó para escribir
   las reglas y para medirlas: el 95% de v3 puede estar inflado (sobreajuste). Lo correcto sería
   validarlo con un conjunto de casos nuevos (holdout), que quedó pendiente.
-- **Cierre acelerado.** Por la fecha de entrega, las últimas fases (cierre de la comparación,
-  guardrails, suite adversarial y README final) se completaron en una sola sesión, con menos
-  instancias de revisión del autor que las fases anteriores.
